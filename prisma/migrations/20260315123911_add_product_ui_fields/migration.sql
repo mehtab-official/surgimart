@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "badge" TEXT,
+ADD COLUMN     "moq" INTEGER,
+ADD COLUMN     "rating" DOUBLE PRECISION NOT NULL DEFAULT 5.0,
+ADD COLUMN     "reviewCount" INTEGER NOT NULL DEFAULT 0;

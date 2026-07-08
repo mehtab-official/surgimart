@@ -1,0 +1,9 @@
+# docker/Dockerfile.dev
+FROM node:20-alpine
+RUN apk add --no-cache libc6-compat openssl
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm install --legacy-peer-deps
+COPY . .
+EXPOSE 3000
+CMD ["sh", "-c", "npx prisma generate && npm run dev"]

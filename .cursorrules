@@ -1,0 +1,73 @@
+# .cursorrules — SurgiMart
+# Save at: surgimart/.cursorrules
+
+You are a senior full-stack engineer on SurgiMart — a B2B + B2C surgical
+instruments eCommerce platform. Manufacturer: Sialkot, Pakistan.
+
+## STACK (exact versions — do not upgrade)
+next 14.2.35 | react ^18 | TypeScript strict | tailwindcss 3.4.1
+next-auth 5.0.0-beta.20 ← v5 beta, different API from v4
+@auth/prisma-adapter 2.11.1 | prisma 5.22.0
+zustand 5.0.11 ← v5, API differs from v4
+stripe 20.4.1 ← v20, API differs from v14
+@stripe/react-stripe-js 5.6.1 | @stripe/stripe-js 8.9.0
+@sanity/client 7.17.0 | next-sanity 12.1.1
+resend 6.9.3 | @react-email/components 1.0.8
+algoliasearch 5.49.2 ← v5, no initIndex(), new client API
+ioredis 5.10.0 | framer-motion 12.35.2
+react-hook-form 7.71.2 | @hookform/resolvers 5.2.2
+zod 4.3.6 ← v4, z.email() standalone, some API changes
+lucide-react 0.577.0 | tailwind-merge 3.5.0 | clsx 2.1.1
+
+## IMPORT ALIAS: @/* → src/*
+
+## WRITTEN FILES — do not rewrite
+src/app/layout.tsx Plus_Jakarta_Sans(--font-jakarta) + Lora(--font-lora)
+<html lang=en class="{jakarta.var} {lora.var}">
+<body class="font-jakarta antialiased min-h-screen flex flex-col">
+Order: Providers > Navbar + main + Footer
+src/app/providers.tsx "use client" | SessionProvider > {children} +
+CartDrawer + ComparisonBar + CookieBanner +
+Toaster(pos:top-right, bg:#0f172a, rounded:12px)
+src/app/page.tsx Hero,TrustStrip,CategoriesGrid,PromoBanners,
+Testimonials,NewsletterSection — BUG-1: no products
+src/app/globals.css --foreground:#0f172a, smooth scroll, 6px scrollbar
+src/middleware.ts /account→/login(!session) | /admin→/(role!=admin)
+
+## DESIGN TOKENS (tailwind.config.ts)
+brand.DEFAULT #2563EB | brand.dark #1D4ED8 | brand.light #EFF6FF
+teal.DEFAULT #0D9488 | teal.light #F0FDFA
+font-jakarta (Plus Jakarta Sans) | font-lora (Lora serif)
+animate-float — translateY 0→-12px, 3s ease-in-out infinite
+next/image domains: cdn.sanity.io, images.unsplash.com
+
+## ZUSTAND (src/store/index.ts)
+useCartStore | useWishlistStore | useCurrencyStore
+useCompareStore (no persist) | useRecentlyViewedStore
+
+## HARD RULES — always follow
+R-01 strict TS — no any, no @ts-ignore, no ! without null check
+R-02 "use client" only when needed — default Server Component
+R-03 data-testid on all interactive elements
+R-04 aria-label on all icon-only buttons
+R-05 useHasMounted() before Zustand localStorage reads
+R-06 React.memo() on ProductCard + list-rendered product components
+R-07 NO dynamic Tailwind: use MAP={2:"grid-cols-2",3:"...",4:"..."}
+R-08 forms: react-hook-form + zodResolver only
+R-09 API routes: Zod input + full try/catch + verifyCsrf + rateLimit
+R-10 NEVER accept amount in payment routes — calculate from Sanity
+R-11 NEVER return SDK error.message to client
+R-12 import "server-only" in all src/lib/ (except utils.ts, env.ts)
+R-13 non-blocking email: Promise.all([...]).catch(console.error)
+R-14 revalidatePath() directly — never HTTP self-call
+R-15 order numbers: SM-[A-F0-9]{8} via crypto.randomUUID()
+R-16 Sanity: sanityReadClient(CDN,no token) + sanityWriteClient(no CDN,token)
+R-17 Stripe webhook: sync before 200, return 500 on DB fail
+R-18 every page exports generateMetadata()
+
+## KNOWN BUGS — fix not reproduce
+BUG-1 page.tsx: make async, getFeaturedProducts(), add ProductGrid
+BUG-2 Navbar.tsx: always shows Sign In — use useSession()
+BUG-3 docker-compose: remove version key + fix REDIS_URL with password
+BUG-4 ProductGrid.tsx: dynamic Tailwind `grid-cols-${n}` — use COL_MAP
+BUG-5 jest.config.ts: setupFilesAfterSetup → setupFilesAfterFramework

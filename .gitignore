@@ -27,6 +27,13 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+
+# nested repos / unrelated folders
+SubMed/
+
+# PDFs and personal docs
+*.pdf
 
 # vercel
 .vercel
