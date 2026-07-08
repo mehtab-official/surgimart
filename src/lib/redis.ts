@@ -1,15 +1,26 @@
+import 'server-only'
 import Redis from 'ioredis'
 
-const globalForRedis = globalThis as unknown as { redis: Redis }
+const globalForRedis = globalThis as unknown as { redis: Redis | null }
 
-export const redis = globalForRedis.redis ?? new Redis(process.env.REDIS_URL!, {
-  password: process.env.REDIS_PASSWORD || undefined,
-  maxRetriesPerRequest: 3,
-  lazyConnect: true,
-  enableReadyCheck: true,
-})
+function createRedis(): Redis {
+  const url = process.env.REDIS_URL
+  if (!url || url === 'redis://placeholder') {
+    // Return a no-op stub so rate limiting silently passes when Redis isn't configured
+    const stub = new Redis({ lazyConnect: true, enableOfflineQueue: false })
+    stub.on('error', () => {}) // suppress errors
+    return stub
+  }
+  const client = new Redis(url, {
+    password: process.env.REDIS_PASSWORD || undefined,
+    maxRetriesPerRequest: 3,
+    lazyConnect: true,
+    enableReadyCheck: false,
+  })
+  client.on('error', (err) => console.error('[Redis] connection error:', err))
+  return client
+}
 
-// Prevent unhandled rejection crashes
-redis.on('error', (err) => console.error('Redis connection error:', err))
+export const redis: Redis = globalForRedis.redis ?? createRedis()
 
 if (process.env.NODE_ENV !== 'production') globalForRedis.redis = redis

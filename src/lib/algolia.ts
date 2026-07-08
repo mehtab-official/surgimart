@@ -1,21 +1,23 @@
 import 'server-only'
-import { algoliasearch } from 'algoliasearch'
 import type { AlgoliaResult } from '@/types'
 
-// H-9: 'server-only' import prevents accidental client-side bundling
-const client = algoliasearch(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'dummy',
-  process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || 'dummy'
-)
-
+const APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
+const SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY
 const INDEX_NAME = 'products'
 
-export async function searchProducts(query: string, limit = 6): Promise<AlgoliaResult[]> {
-  // Return empty if keys not configured
-  if (!process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 
-      process.env.NEXT_PUBLIC_ALGOLIA_APP_ID === 'your_app_id') {
-    return []
+// Lazy-initialize so missing keys don't crash at module load time
+function getClient() {
+  if (!APP_ID || !SEARCH_KEY || APP_ID === 'your_app_id' || APP_ID === 'placeholder') {
+    return null
   }
+  // Dynamic import to avoid module-level initialization
+  const { algoliasearch } = require('algoliasearch')
+  return algoliasearch(APP_ID, SEARCH_KEY)
+}
+
+export async function searchProducts(query: string, limit = 6): Promise<AlgoliaResult[]> {
+  const client = getClient()
+  if (!client) return []
 
   try {
     const { hits } = await client.searchSingleIndex<AlgoliaResult>({
@@ -31,6 +33,6 @@ export async function searchProducts(query: string, limit = 6): Promise<AlgoliaR
     return hits
   } catch (error) {
     console.error('[Algolia] Search failed:', error)
-    return []   // never crash the app
+    return []
   }
 }
