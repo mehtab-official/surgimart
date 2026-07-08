@@ -34,7 +34,7 @@ export async function sendEmail(opts: {
       from: opts.from ?? process.env.RESEND_FROM ?? 'orders@surgimart.com',
       to: opts.to,
       subject: opts.subject,
-      html: opts.html,
+      ...(opts.html ? { html: opts.html } : { text: '' }),
     })
   } catch (err) {
     console.error('[Resend] Failed to send email:', err)
