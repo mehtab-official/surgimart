@@ -1,6 +1,6 @@
+import 'server-only'
 import Stripe from 'stripe'
 
-// Lazy-initialize to avoid crashing when key is placeholder/missing
 let _stripe: Stripe | null = null
 
 function getStripe(): Stripe {
@@ -17,9 +17,11 @@ function getStripe(): Stripe {
   return _stripe
 }
 
+// Proxy defers instantiation to first use — avoids crashing at module load
+// when STRIPE_SECRET_KEY is a placeholder during build
 export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
-    return (getStripe() as Record<string | symbol, unknown>)[prop]
+    return (getStripe() as unknown as Record<string | symbol, unknown>)[prop]
   },
 })
 
