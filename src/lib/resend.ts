@@ -1,41 +1,43 @@
+import 'server-only'
 import { Resend } from 'resend'
 
-// Lazy-initialize so missing key doesn't crash at module load
-let _resend: Resend | null = null
+// Lazy singleton — only creates the real client when first used
+let _client: Resend | null = null
 
-function getResend(): Resend {
-  if (!_resend) {
+function getClient(): Resend {
+  if (!_client) {
     const key = process.env.RESEND_API_KEY
-    if (!key || !key.startsWith('re_')) {
-      throw new Error('RESEND_API_KEY is not configured')
-    }
-    _resend = new Resend(key)
+    // Use a dummy key so the Resend constructor doesn't throw —
+    // actual calls will fail gracefully and be caught at call sites
+    _client = new Resend(key && key.startsWith('re_') ? key : 're_placeholder_000')
   }
-  return _resend
+  return _client
 }
 
-interface SendEmailOptions {
+// Export a Proxy so `resend.emails.send(...)` works everywhere
+// but the Resend instance is not created at module load time
+export const resend = new Proxy({} as Resend, {
+  get(_target, prop) {
+    return (getClient() as unknown as Record<string | symbol, unknown>)[prop]
+  },
+})
+
+// Helper for convenience (optional)
+export async function sendEmail(opts: {
   to: string | string[]
   subject: string
   html?: string
-  react?: React.ReactElement
   from?: string
-}
-
-export async function sendEmail(opts: SendEmailOptions) {
+}) {
   try {
-    const resend = getResend()
-    return await resend.emails.send({
+    return await getClient().emails.send({
       from: opts.from ?? process.env.RESEND_FROM ?? 'orders@surgimart.com',
       to: opts.to,
       subject: opts.subject,
       html: opts.html,
-      react: opts.react,
     })
   } catch (err) {
     console.error('[Resend] Failed to send email:', err)
     return null
   }
 }
-
-export { getResend as resend }
