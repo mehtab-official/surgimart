@@ -1,18 +1,20 @@
 import 'server-only'
+import { algoliasearch, type SearchClient } from 'algoliasearch'
 import type { AlgoliaResult } from '@/types'
 
 const APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
 const SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY
 const INDEX_NAME = 'products'
 
-// Lazy-initialize so missing keys don't crash at module load time
-function getClient() {
+let _client: SearchClient | null = null
+
+function getClient(): SearchClient | null {
+  if (_client) return _client
   if (!APP_ID || !SEARCH_KEY || APP_ID === 'your_app_id' || APP_ID === 'placeholder') {
     return null
   }
-  // Dynamic import to avoid module-level initialization
-  const { algoliasearch } = require('algoliasearch')
-  return algoliasearch(APP_ID, SEARCH_KEY)
+  _client = algoliasearch(APP_ID, SEARCH_KEY)
+  return _client
 }
 
 export async function searchProducts(query: string, limit = 6): Promise<AlgoliaResult[]> {
