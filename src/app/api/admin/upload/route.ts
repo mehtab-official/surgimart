@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { put } from '@vercel/blob'
+import { v2 as cloudinary } from 'cloudinary'
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 /** Allowed image MIME types */
 const ALLOWED_MIME_TYPES = new Set([
@@ -20,7 +26,6 @@ const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (session?.user?.role !== 'admin') {
-    console.error('[Upload API] Unauthorized access attempt')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
@@ -29,20 +34,13 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File
 
     if (!file) {
-      console.error('[Upload API] No file in form data')
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
     }
-
-    console.log('[Upload API] Processing file:', {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    })
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE_BYTES) {
       return NextResponse.json(
-        { error: `File too large. Maximum allowed size is ${MAX_FILE_SIZE_BYTES / 1024 / 1024} MB.` },
+        { error: `File too large. Maximum size is ${MAX_FILE_SIZE_BYTES / 1024 / 1024}MB.` },
         { status: 413 }
       )
     }
@@ -50,7 +48,7 @@ export async function POST(req: NextRequest) {
     // Validate MIME type
     if (!ALLOWED_MIME_TYPES.has(file.type)) {
       return NextResponse.json(
-        { error: 'Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.' },
+        { error: 'Invalid file type. Only JPEG, PNG, WebP, and GIF allowed.' },
         { status: 415 }
       )
     }
@@ -59,24 +57,26 @@ export async function POST(req: NextRequest) {
     const rawExt = file.name.split('.').pop()?.toLowerCase() ?? ''
     if (!ALLOWED_EXTENSIONS.has(rawExt)) {
       return NextResponse.json(
-        { error: 'Invalid file extension. Only jpg, jpeg, png, webp, and gif are allowed.' },
+        { error: 'Invalid file extension.' },
         { status: 415 }
       )
     }
 
-    // Upload to Vercel Blob Storage
-    const blob = await put(file.name, file, {
-      access: 'public',
-      addRandomSuffix: true,
+    // Convert file to buffer then base64 for Cloudinary upload
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(base64, {
+      folder: 'surgimart/products',
+      resource_type: 'image',
     })
 
-    console.log('[Upload API] File uploaded to blob storage:', blob.url)
-    return NextResponse.json({ url: blob.url })
+    console.log('[Upload API] Uploaded to Cloudinary:', result.secure_url)
+    return NextResponse.json({ url: result.secure_url })
   } catch (error) {
-    console.error('[Upload API] Error details:', {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    })
+    console.error('[Upload API] Error:', error instanceof Error ? error.message : error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }

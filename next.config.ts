@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'via.placeholder.com' },
       // Vercel Blob Storage
       { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+      // Cloudinary
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
     ],
     // Allow local uploads
     unoptimized: process.env.NODE_ENV === 'development',
