@@ -2,12 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { v2 as cloudinary } from 'cloudinary'
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
-
 /** Allowed image MIME types */
 const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg',
@@ -23,10 +17,47 @@ const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif'])
 /** 5 MB limit */
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
 
+// Diagnostic GET — lets you verify env vars are set without uploading
+export async function GET() {
+  const session = await auth()
+  if (session?.user?.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+  return NextResponse.json({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? '✅ set' : '❌ missing',
+    api_key: process.env.CLOUDINARY_API_KEY ? '✅ set' : '❌ missing',
+    api_secret: process.env.CLOUDINARY_API_SECRET ? '✅ set' : '❌ missing',
+  })
+}
+
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (session?.user?.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  }
+
+  // Configure inside the handler so env vars are always fresh
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  })
+
+  // Guard: fail fast if any Cloudinary var is missing
+  if (
+    !process.env.CLOUDINARY_CLOUD_NAME ||
+    !process.env.CLOUDINARY_API_KEY ||
+    !process.env.CLOUDINARY_API_SECRET
+  ) {
+    console.error('[Upload API] Missing Cloudinary env vars:', {
+      cloud_name: !!process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: !!process.env.CLOUDINARY_API_KEY,
+      api_secret: !!process.env.CLOUDINARY_API_SECRET,
+    })
+    return NextResponse.json(
+      { error: 'Server misconfiguration: Cloudinary credentials not set' },
+      { status: 500 }
+    )
   }
 
   try {
@@ -62,7 +93,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Convert file to buffer then base64 for Cloudinary upload
+    // Convert to base64 for Cloudinary
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
