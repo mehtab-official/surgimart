@@ -10,8 +10,19 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'via.placeholder.com' },
     ],
+    // Allow local uploads
+    unoptimized: process.env.NODE_ENV === 'development',
   },
   serverExternalPackages: ['@prisma/client'],
   transpilePackages: ['until-async', 'msw', '@mswjs'],
+  // Add rewrites to properly serve uploaded files in dev mode
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: '/uploads/:path*',
+      },
+    ]
+  },
 }
 export default nextConfig
