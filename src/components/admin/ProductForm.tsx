@@ -60,7 +60,7 @@ export function ProductForm({ initialData, productId }: Props) {
   }, [name, setValue, productId])
 
   useEffect(() => {
-    fetch('/api/admin/categories')
+    fetch('/api/admin/categories', { credentials: 'include' })
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(err => console.error('Failed to load categories', err))
@@ -81,6 +81,7 @@ export function ProductForm({ initialData, productId }: Props) {
     try {
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       })
       const data = await res.json()
@@ -88,6 +89,7 @@ export function ProductForm({ initialData, productId }: Props) {
         setImages(prev => [...prev, data.url])
         toast.success('Image uploaded')
       } else {
+        toast.error(data.error || 'Upload failed')
         throw new Error(data.error)
       }
     } catch (error) {
@@ -117,6 +119,7 @@ export function ProductForm({ initialData, productId }: Props) {
 
       const res = await fetch(url, {
         method,
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })

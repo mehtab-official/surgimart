@@ -15,6 +15,7 @@ export function ProductTableActions({ productId }: { productId: string }) {
     try {
       const res = await fetch(`/api/admin/products/${productId}`, {
         method: 'DELETE',
+        credentials: 'include',
       })
 
       if (!res.ok) throw new Error('Failed to delete')
