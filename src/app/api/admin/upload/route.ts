@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { writeFile } from 'fs/promises'
+import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -39,30 +39,28 @@ export async function POST(req: NextRequest) {
       name: file.name,
       size: file.size,
       type: file.type,
+      cwd: process.cwd(),
     })
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      console.error('[Upload API] File too large:', file.size)
       return NextResponse.json(
         { error: `File too large. Maximum allowed size is ${MAX_FILE_SIZE_BYTES / 1024 / 1024} MB.` },
         { status: 413 }
       )
     }
 
-    // Validate MIME type (from Content-Type metadata the browser sends)
+    // Validate MIME type
     if (!ALLOWED_MIME_TYPES.has(file.type)) {
-      console.error('[Upload API] Invalid MIME type:', file.type)
       return NextResponse.json(
         { error: 'Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.' },
         { status: 415 }
       )
     }
 
-    // Validate extension (secondary guard — never trust the filename alone)
+    // Validate extension
     const rawExt = file.name.split('.').pop()?.toLowerCase() ?? ''
     if (!ALLOWED_EXTENSIONS.has(rawExt)) {
-      console.error('[Upload API] Invalid extension:', rawExt)
       return NextResponse.json(
         { error: 'Invalid file extension. Only jpg, jpeg, png, webp, and gif are allowed.' },
         { status: 415 }
@@ -72,19 +70,27 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Use a UUID-based name to prevent path traversal / filename collisions
     const fileName = `${uuidv4()}.${rawExt}`
-    const uploadPath = join(process.cwd(), 'public', 'uploads', 'products', fileName)
+    const uploadDir = join(process.cwd(), 'public', 'uploads', 'products')
+    const uploadPath = join(uploadDir, fileName)
+
+    // Ensure upload directory exists (create if missing)
+    await mkdir(uploadDir, { recursive: true })
 
     console.log('[Upload API] Writing file to:', uploadPath)
     await writeFile(uploadPath, buffer)
-    console.log('[Upload API] File written successfully')
+    console.log('[Upload API] File written successfully:', fileName)
 
     const url = `/uploads/products/${fileName}`
-    console.log('[Upload API] Returning URL:', url)
     return NextResponse.json({ url })
   } catch (error) {
-    console.error('[Upload API] Error:', error)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    console.error('[Upload API] Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Upload failed' },
+      { status: 500 }
+    )
   }
 }
