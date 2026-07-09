@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { v4 as uuidv4 } from 'uuid'
+import { put } from '@vercel/blob'
 
 /** Allowed image MIME types */
 const ALLOWED_MIME_TYPES = new Set([
@@ -13,7 +11,7 @@ const ALLOWED_MIME_TYPES = new Set([
   'image/gif',
 ])
 
-/** Allowed file extensions (derived from filename — secondary check) */
+/** Allowed file extensions */
 const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif'])
 
 /** 5 MB limit */
@@ -39,7 +37,6 @@ export async function POST(req: NextRequest) {
       name: file.name,
       size: file.size,
       type: file.type,
-      cwd: process.cwd(),
     })
 
     // Validate file size
@@ -67,22 +64,14 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    // Upload to Vercel Blob Storage
+    const blob = await put(file.name, file, {
+      access: 'public',
+      addRandomSuffix: true,
+    })
 
-    const fileName = `${uuidv4()}.${rawExt}`
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'products')
-    const uploadPath = join(uploadDir, fileName)
-
-    // Ensure upload directory exists (create if missing)
-    await mkdir(uploadDir, { recursive: true })
-
-    console.log('[Upload API] Writing file to:', uploadPath)
-    await writeFile(uploadPath, buffer)
-    console.log('[Upload API] File written successfully:', fileName)
-
-    const url = `/uploads/products/${fileName}`
-    return NextResponse.json({ url })
+    console.log('[Upload API] File uploaded to blob storage:', blob.url)
+    return NextResponse.json({ url: blob.url })
   } catch (error) {
     console.error('[Upload API] Error details:', {
       message: error instanceof Error ? error.message : String(error),
