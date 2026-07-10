@@ -1,70 +1,126 @@
 'use client'
 import { useState } from 'react'
-import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
+import { Banknote, Truck, Building2, Copy, CheckCircle2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-interface Props { onComplete: () => void }
+export type PaymentMethod = 'cod' | 'bank_transfer'
+
+interface Props {
+  onComplete: (method: PaymentMethod) => void
+}
+
+const BANK_DETAILS = {
+  bankName: 'Meezan Bank',
+  accountTitle: 'Submed Ortho',
+  accountNumber: '0123456789',
+  iban: 'PK00MEZN0001234567890',
+  branch: 'Main Branch, Lahore',
+}
 
 export function PaymentStep({ onComplete }: Props) {
-  const stripe = useStripe()
-  const elements = useElements()
-  const [loading, setLoading] = useState(false)
+  const [selected, setSelected] = useState<PaymentMethod | null>(null)
+  const [copied, setCopied] = useState(false)
 
-  async function handlePay(e: React.FormEvent) {
-    e.preventDefault()
-    if (process.env.NEXT_PUBLIC_E2E_MOCK !== 'true' && (!stripe || !elements)) return
-    if (loading) return
-    setLoading(true)
-    try {
-      if (process.env.NEXT_PUBLIC_E2E_MOCK === 'true') {
-      console.log('[DEBUG] PaymentStep mock handlePay calling onComplete')
-      onComplete()
-      return
-    }
-      if (!stripe || !elements) return
-
-      const { error } = await stripe.confirmPayment({
-        elements: elements,
-        redirect: 'if_required',
-      })
-      if (error) {
-        toast.error(error.message || 'Payment failed')
-      } else {
-        onComplete()
-      }
-    } catch {
-      toast.error('Payment failed')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (process.env.NEXT_PUBLIC_E2E_MOCK === 'true') {
-    return (
-      <form data-testid='payment-form' onSubmit={handlePay} className='space-y-6'>
-        <div className='p-4 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50'>
-          <p className='text-sm text-blue-700 font-medium mb-4'>[E2E MOCK] Stripe Payment Element</p>
-          <input data-testid='mock-card-number' placeholder='Card number' className='w-full border rounded-lg px-3 py-2 text-sm mb-3' defaultValue='4242 4242 4242 4242' />
-          <div className='grid grid-cols-2 gap-3'>
-            <input data-testid='mock-expiry' placeholder='MM / YY' className='border rounded-lg px-3 py-2 text-sm' defaultValue='12/29' />
-            <input data-testid='mock-cvc' placeholder='CVC' className='border rounded-lg px-3 py-2 text-sm' defaultValue='123' />
-          </div>
-        </div>
-        <button type='submit' data-testid='pay-btn'
-          className='w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700'>
-          Pay Now
-        </button>
-      </form>
-    )
+  function copyIban() {
+    navigator.clipboard.writeText(BANK_DETAILS.iban)
+    setCopied(true)
+    toast.success('IBAN copied!')
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <form data-testid='payment-form' onSubmit={handlePay} className='space-y-6'>
-      <PaymentElement />
-      <button type='submit' disabled={!stripe || loading} data-testid='pay-btn'
-        className='w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50'>
-        {loading ? 'Processing...' : 'Pay Now'}
+    <div className='space-y-6'>
+      <h2 className='text-xl font-bold text-slate-800'>Select Payment Method</h2>
+
+      {/* COD Option */}
+      <label className={`flex items-start gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+        selected === 'cod' ? 'border-blue-600 bg-blue-50' : 'border-slate-200 hover:border-blue-300'
+      }`}>
+        <input
+          type='radio'
+          name='payment'
+          value='cod'
+          className='mt-1 accent-blue-600'
+          checked={selected === 'cod'}
+          onChange={() => setSelected('cod')}
+        />
+        <div className='flex-1'>
+          <div className='flex items-center gap-2 mb-1'>
+            <Truck size={20} className='text-blue-600' />
+            <span className='font-bold text-slate-800'>Cash on Delivery (COD)</span>
+          </div>
+          <p className='text-sm text-slate-500'>Pay in cash when your order is delivered. Available for select regions.</p>
+        </div>
+      </label>
+
+      {/* Bank Transfer Option */}
+      <label className={`flex items-start gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+        selected === 'bank_transfer' ? 'border-blue-600 bg-blue-50' : 'border-slate-200 hover:border-blue-300'
+      }`}>
+        <input
+          type='radio'
+          name='payment'
+          value='bank_transfer'
+          className='mt-1 accent-blue-600'
+          checked={selected === 'bank_transfer'}
+          onChange={() => setSelected('bank_transfer')}
+        />
+        <div className='flex-1'>
+          <div className='flex items-center gap-2 mb-1'>
+            <Building2 size={20} className='text-blue-600' />
+            <span className='font-bold text-slate-800'>Bank Transfer</span>
+          </div>
+          <p className='text-sm text-slate-500'>Transfer payment to our bank account. Order will be processed after confirmation.</p>
+        </div>
+      </label>
+
+      {/* Bank Details — shown when bank transfer is selected */}
+      {selected === 'bank_transfer' && (
+        <div className='bg-slate-50 rounded-2xl border border-slate-200 p-5 space-y-3'>
+          <div className='flex items-center gap-2 mb-3'>
+            <Banknote size={18} className='text-blue-600' />
+            <span className='font-bold text-slate-800'>Bank Account Details</span>
+          </div>
+          {[
+            { label: 'Bank Name', value: BANK_DETAILS.bankName },
+            { label: 'Account Title', value: BANK_DETAILS.accountTitle },
+            { label: 'Account Number', value: BANK_DETAILS.accountNumber },
+            { label: 'Branch', value: BANK_DETAILS.branch },
+          ].map(({ label, value }) => (
+            <div key={label} className='flex justify-between text-sm'>
+              <span className='text-slate-500 font-medium'>{label}</span>
+              <span className='font-bold text-slate-800'>{value}</span>
+            </div>
+          ))}
+          <div className='flex justify-between items-center text-sm border-t border-slate-200 pt-3'>
+            <span className='text-slate-500 font-medium'>IBAN</span>
+            <div className='flex items-center gap-2'>
+              <span className='font-bold text-slate-800 font-mono'>{BANK_DETAILS.iban}</span>
+              <button
+                type='button'
+                onClick={copyIban}
+                className='p-1 hover:bg-slate-200 rounded transition-colors'
+                title='Copy IBAN'
+              >
+                {copied ? <CheckCircle2 size={14} className='text-green-500' /> : <Copy size={14} className='text-slate-400' />}
+              </button>
+            </div>
+          </div>
+          <p className='text-xs text-amber-600 bg-amber-50 rounded-lg p-3 mt-2'>
+            📌 Please use your order number as the payment reference. Your order will be confirmed within 24 hours after payment verification.
+          </p>
+        </div>
+      )}
+
+      <button
+        type='button'
+        disabled={!selected}
+        onClick={() => selected && onComplete(selected)}
+        data-testid='pay-btn'
+        className='w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+      >
+        {selected === 'cod' ? 'Place Order (Pay on Delivery)' : selected === 'bank_transfer' ? 'Place Order (Bank Transfer)' : 'Select a Payment Method'}
       </button>
-    </form>
+    </div>
   )
 }
