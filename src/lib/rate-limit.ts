@@ -18,13 +18,18 @@ export async function rateLimit(
   limit: number,
   windowSeconds: number
 ): Promise<RateLimitResult> {
-  const current = await redis.incr(key)
-  if (current === 1) {
-    await redis.expire(key, windowSeconds)
+  try {
+    const current = await redis.incr(key)
+    if (current === 1) {
+      await redis.expire(key, windowSeconds)
+    }
+    if (current > limit) {
+      const ttl = await redis.ttl(key)
+      return { allowed: false, remaining: 0, retryAfter: ttl > 0 ? ttl : windowSeconds }
+    }
+    return { allowed: true, remaining: limit - current }
+  } catch {
+    // Redis unavailable — fail open so orders still work
+    return { allowed: true, remaining: limit }
   }
-  if (current > limit) {
-    const ttl = await redis.ttl(key)
-    return { allowed: false, remaining: 0, retryAfter: ttl > 0 ? ttl : windowSeconds }
-  }
-  return { allowed: true, remaining: limit - current }
 }
