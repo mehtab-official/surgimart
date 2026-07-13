@@ -60,18 +60,27 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const validatedData = productSchema.parse(body)
+    console.log('[Admin Products POST] body:', JSON.stringify(body).slice(0, 300))
+
+    const parsed = productSchema.safeParse(body)
+    if (!parsed.success) {
+      console.error('[Admin Products POST] Validation failed:', parsed.error.flatten())
+      return NextResponse.json(
+        { error: 'Validation failed', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
     const product = await prisma.product.create({
-      data: validatedData,
+      data: parsed.data,
     })
 
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
-    if (error instanceof Error && 'name' in error && error.name === 'ZodError') {
-      return NextResponse.json({ error: 'Validation failed', details: error }, { status: 400 })
-    }
     console.error('[Admin Products POST]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

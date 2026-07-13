@@ -48,20 +48,27 @@ export async function PUT(
 
   try {
     const body = await req.json()
-    const validatedData = productSchema.parse(body)
+    const parsed = productSchema.safeParse(body)
+    if (!parsed.success) {
+      console.error('[Admin Product PUT] Validation failed:', parsed.error.flatten())
+      return NextResponse.json(
+        { error: 'Validation failed', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
     const product = await prisma.product.update({
       where: { id },
-      data: validatedData,
+      data: parsed.data,
     })
 
     return NextResponse.json(product)
   } catch (error) {
-    if (error instanceof Error && 'name' in error && error.name === 'ZodError') {
-      return NextResponse.json({ error: 'Validation failed', details: error }, { status: 400 })
-    }
     console.error('[Admin Product PUT]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 

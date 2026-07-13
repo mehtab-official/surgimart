@@ -126,7 +126,11 @@ export function ProductForm({ initialData, productId }: Props) {
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || 'Failed to save product')
+        const message = err.error || 'Failed to save product'
+        const details = err.details?.fieldErrors
+          ? Object.entries(err.details.fieldErrors).map(([f, msgs]) => `${f}: ${(msgs as string[]).join(', ')}`).join(' | ')
+          : ''
+        throw new Error(details ? `${message} — ${details}` : message)
       }
 
       toast.success(productId ? 'Product updated' : 'Product created')
