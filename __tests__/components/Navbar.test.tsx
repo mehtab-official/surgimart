@@ -33,13 +33,9 @@ describe('Navbar', () => {
     expect(screen.getByText('Test User')).toBeInTheDocument()
   })
 
-  it('displays cart badge with correct count', () => {
-    const cartState = { 
-      items: [{ id: '1', qty: 3 }, { id: '2', qty: 2 }],
-      openCart: jest.fn()
-    }
-    ;(useCartStore as unknown as jest.Mock).mockImplementation((sel: any) => sel ? sel(cartState) : cartState)
+  it('displays RFQ quote request action link', () => {
     render(<Navbar />)
-    expect(screen.getByTestId('cart-badge')).toHaveTextContent('5')
+    expect(screen.getByTestId('nav-cart-icon')).toBeInTheDocument()
+    expect(screen.getByText('Request a Quote')).toBeInTheDocument()
   })
 })

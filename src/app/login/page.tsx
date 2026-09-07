@@ -13,8 +13,19 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     const res = await signIn('credentials', { email, password, redirect: false })
-    if (res?.error) { toast.error('Invalid email or password') }
-    else { window.location.href = '/account' }
+    if (res?.error) { 
+      toast.error('Invalid email or password') 
+    } else {
+      const searchParams = new URLSearchParams(window.location.search)
+      const callbackUrl = searchParams.get('callbackUrl')
+      if (callbackUrl) {
+        window.location.href = callbackUrl
+      } else if (email.includes('admin')) {
+        window.location.href = '/admin'
+      } else {
+        window.location.href = '/account'
+      }
+    }
     setLoading(false)
   }
 

@@ -1,0 +1,6 @@
+export * from '@/components/homepage/CategoriesGrid'
+export * from '@/components/homepage/Hero'
+export * from '@/components/homepage/NewsletterSection'
+export * from '@/components/homepage/PromoBanners'
+export * from '@/components/homepage/Testimonials'
+export * from '@/components/homepage/TrustStrip'

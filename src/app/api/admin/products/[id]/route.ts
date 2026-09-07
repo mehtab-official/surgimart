@@ -1,100 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { productSchema } from '@/lib/validations'
-import { verifyCsrf } from '@/lib/csrf'
+import { NextRequest } from 'next/server'
+import { productController } from '@/server/controllers/product.controller'
 
-// GET /api/admin/products/[id] - Get a single product
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params
-  const session = await auth()
-  if (session?.user?.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-  }
-
-  try {
-    const product = await prisma.product.findUnique({
-      where: { id },
-    })
-
-    if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-    }
-
-    return NextResponse.json(product)
-  } catch (error) {
-    console.error('[Admin Product GET]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  return productController.getAdminProductById(req, context)
 }
 
-// PUT /api/admin/products/[id] - Update a product
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params
-  const session = await auth()
-  if (session?.user?.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-  }
-
-  if (!verifyCsrf(req)) {
-    return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 })
-  }
-
-  try {
-    const body = await req.json()
-    const parsed = productSchema.safeParse(body)
-    if (!parsed.success) {
-      console.error('[Admin Product PUT] Validation failed:', parsed.error.flatten())
-      return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.flatten() },
-        { status: 400 }
-      )
-    }
-
-    const product = await prisma.product.update({
-      where: { id },
-      data: parsed.data,
-    })
-
-    return NextResponse.json(product)
-  } catch (error) {
-    console.error('[Admin Product PUT]', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    )
-  }
+  return productController.updateAdminProduct(req, context)
 }
 
-// DELETE /api/admin/products/[id] - Delete a product
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params
-  const session = await auth()
-  if (session?.user?.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-  }
-
-  if (!verifyCsrf(req)) {
-    return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 })
-  }
-
-  try {
-    await prisma.product.delete({
-      where: { id },
-    })
-
-    return new NextResponse(null, { status: 204 })
-  } catch (error) {
-    console.error('[Admin Product DELETE]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  return productController.deleteAdminProduct(req, context)
 }

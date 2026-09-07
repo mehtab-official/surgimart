@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
 export default async function AccountPage() {
@@ -9,14 +10,28 @@ export default async function AccountPage() {
     redirect('/login')
   }
 
-  const orders = await prisma.order.findMany({
-    where: { shippingEmail: session.user.email || '' },
-    orderBy: { createdAt: 'desc' },
-    take: 5
-  })
+  let orders: any[] = []
+  try {
+    orders = await prisma.order.findMany({
+      where: { shippingEmail: session.user.email || '' },
+      orderBy: { createdAt: 'desc' },
+      take: 5
+    })
+  } catch (err) {
+    console.warn('Database query failed in AccountPage, defaulting to empty orders:', err)
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className='mb-6'>
+        <Link 
+          href='/'
+          className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-colors shadow-sm'
+        >
+          ← Back to Home
+        </Link>
+      </div>
+
       <h1 className="text-3xl font-bold mb-8">My Account</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

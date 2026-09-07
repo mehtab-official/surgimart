@@ -1,37 +1,35 @@
 import { Hero } from '@/components/homepage/Hero'
-import { TrustStrip } from '@/components/homepage/TrustStrip'
-import { CategoriesGrid } from '@/components/homepage/CategoriesGrid'
-import { PromoBanners } from '@/components/homepage/PromoBanners'
+import { FeaturedProducts } from '@/components/homepage/FeaturedProducts'
+import { QualitySequence } from '@/components/homepage/QualitySequence'
+import { EventsSection } from '@/components/homepage/EventsSection'
 import { Testimonials } from '@/components/homepage/Testimonials'
 import { NewsletterSection } from '@/components/homepage/NewsletterSection'
-import { ProductGrid } from '@/components/product/ProductGrid'
-import { getFeaturedProducts } from '@/lib/products'
-import type { Product } from '@/types'
+import { CategoriesGrid } from '@/components/homepage/CategoriesGrid'
 
-// M-14: Homepage now fetches and displays featured products
 export const dynamic = 'force-dynamic'
-export default async function HomePage() {
-  let featuredProducts: Product[] = []
-  try {
-    featuredProducts = await getFeaturedProducts()
-  } catch (e) {
-    console.warn("Failed to fetch products:", e)
-  }
 
+export default function HomePage() {
   return (
     <>
+      {/* 1. Hero Section (Precision Surgical Instruments Banner & RFQ CTAs) */}
       <Hero />
-      <TrustStrip />
+
+      {/* 2. Featured Hot Selling Products & 360 Video Boxes */}
+      <FeaturedProducts />
+
+      {/* 3. Primary Export Categories Showcase */}
       <CategoriesGrid />
-      <PromoBanners />
-      {featuredProducts.length > 0 && (
-        <section className='max-w-7xl mx-auto px-4 py-16' data-testid='bestsellers-section'>
-          <h2 className='font-lora text-3xl font-bold text-center mb-3'>Bestsellers</h2>
-          <p className='text-center text-slate-500 mb-10'>Our most popular surgical instruments</p>
-          <ProductGrid products={featuredProducts} columns={4} />
-        </section>
-      )}
+
+      {/* 4. Quality Management as the Finishing Touch (5-Step CAD to Cleaning Process) */}
+      <QualitySequence />
+
+      {/* 5. Medical Expos & International Trade Fairs */}
+      <EventsSection />
+
+      {/* 6. Doctor & Foreign Surgeon Reviews */}
       <Testimonials />
+
+      {/* 7. Newsletter & Export Updates */}
       <NewsletterSection />
     </>
   )

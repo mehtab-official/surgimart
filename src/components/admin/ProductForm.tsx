@@ -146,98 +146,104 @@ export function ProductForm({ initialData, productId }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-8 max-w-4xl'>
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-8 max-w-4xl text-slate-200'>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
         {/* Left Column: Basic Info */}
         <div className='space-y-6'>
-          <div className='bg-white p-6 rounded-2xl border border-slate-200 space-y-4'>
-            <h3 className='font-bold text-slate-800 border-b border-slate-100 pb-3'>Basic Information</h3>
+          <div className='bg-slate-900/90 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-sm'>
+            <h3 className='font-bold text-white border-b border-slate-800 pb-3 flex items-center justify-between text-sm'>
+              <span>Basic Instrument Details</span>
+              <span className='text-[10px] uppercase tracking-wider text-amber-400 font-mono font-bold'>Showcase Listing</span>
+            </h3>
             
             <div>
-              <label className='text-sm font-medium block mb-1'>Product Name</label>
+              <label className='text-xs font-semibold text-slate-300 block mb-1.5'>Instrument Name *</label>
               <input 
                 {...register('name')}
-                placeholder='e.g. Surgical Scalpel Set'
-                className='w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none'
+                placeholder='e.g. Surgical Hemostatic Kelly Forceps 14cm'
+                className='w-full bg-[#070e1e] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-none transition-all'
               />
-              {errors.name && <p className='text-xs text-red-500 mt-1'>{errors.name.message}</p>}
+              {errors.name && <p className='text-xs text-rose-400 mt-1'>{errors.name.message}</p>}
             </div>
 
             <div>
-              <label className='text-sm font-medium block mb-1'>Slug</label>
+              <label className='text-xs font-semibold text-slate-300 block mb-1.5'>URL Slug *</label>
               <input 
                 {...register('slug')}
-                placeholder='surgical-scalpel-set'
-                className='w-full border rounded-lg px-3 py-2 text-sm bg-slate-50'
+                placeholder='surgical-kelly-forceps-14cm'
+                className='w-full bg-[#070e1e]/60 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-300 placeholder:text-slate-600 focus:border-slate-600 outline-none'
               />
-              {errors.slug && <p className='text-xs text-red-500 mt-1'>{errors.slug.message}</p>}
+              {errors.slug && <p className='text-xs text-rose-400 mt-1'>{errors.slug.message}</p>}
             </div>
 
             <div>
-              <label className='text-sm font-medium block mb-1'>Description</label>
+              <label className='text-xs font-semibold text-slate-300 block mb-1.5'>Technical Specification / Description</label>
               <textarea 
                 {...register('description')}
                 rows={4}
-                className='w-full border rounded-lg px-3 py-2 text-sm outline-none'
+                placeholder='Precision box joint locking mechanism, AISI 410 stainless steel, surgical grade serrations...'
+                className='w-full bg-[#070e1e] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-none transition-all resize-none'
               />
             </div>
           </div>
 
-          <div className='bg-white p-6 rounded-2xl border border-slate-200 space-y-4'>
-            <h3 className='font-bold text-slate-800 border-b border-slate-100 pb-3'>Pricing & Inventory</h3>
+          <div className='bg-slate-900/90 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-sm'>
+            <h3 className='font-bold text-white border-b border-slate-800 pb-3 text-sm'>
+              Specifications & Inventory Tiers
+            </h3>
             
             <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className='text-sm font-medium block mb-1'>Price ($)</label>
+                <label className='text-xs font-semibold text-slate-300 block mb-1.5'>Target Rate / RFQ ($)</label>
                 <input 
                   type='number'
                   step='0.01'
                   {...register('price', { valueAsNumber: true })}
-                  className='w-full border rounded-lg px-3 py-2 text-sm'
+                  className='w-full bg-[#070e1e] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-amber-400 outline-none'
                 />
               </div>
               <div>
-                <label className='text-sm font-medium block mb-1'>Compare Price ($)</label>
+                <label className='text-xs font-semibold text-slate-300 block mb-1.5'>Catalogue Baseline ($)</label>
                 <input 
                   type='number'
                   step='0.01'
                   {...register('comparePrice', { valueAsNumber: true })}
-                  className='w-full border rounded-lg px-3 py-2 text-sm'
+                  className='w-full bg-[#070e1e] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-amber-400 outline-none'
                 />
               </div>
             </div>
 
             <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className='text-sm font-medium block mb-1'>Stock Count</label>
+                <label className='text-xs font-semibold text-slate-300 block mb-1.5'>Export Batch Stock</label>
                 <input 
                   type='number'
                   {...register('stockCount', { valueAsNumber: true })}
-                  className='w-full border rounded-lg px-3 py-2 text-sm'
+                  className='w-full bg-[#070e1e] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-amber-400 outline-none'
                 />
               </div>
               <div>
-                <label className='text-sm font-medium block mb-1'>SKU</label>
+                <label className='text-xs font-semibold text-slate-300 block mb-1.5'>Model SKU</label>
                 <input 
                   {...register('sku')}
-                  placeholder='SRG-001'
-                  className='w-full border rounded-lg px-3 py-2 text-sm'
+                  placeholder='SM-FC-140'
+                  className='w-full bg-[#070e1e] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white placeholder:text-slate-500 focus:border-amber-400 outline-none'
                 />
               </div>
             </div>
             
-            <div className='flex items-center gap-6 pt-2'>
-               <label className='flex items-center gap-2 text-sm font-medium cursor-pointer'>
-                 <input type='checkbox' {...register('inStock')} />
-                 In Stock
+            <div className='flex items-center gap-6 pt-2 border-t border-slate-800/80'>
+               <label className='flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer'>
+                 <input type='checkbox' {...register('inStock')} className='w-4 h-4 rounded text-amber-500 accent-amber-500 bg-slate-950 border-slate-700' />
+                 Export Ready
                </label>
-               <label className='flex items-center gap-2 text-sm font-medium cursor-pointer'>
-                 <input type='checkbox' {...register('isFeatured')} />
-                 Featured
+               <label className='flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer'>
+                 <input type='checkbox' {...register('isFeatured')} className='w-4 h-4 rounded text-amber-500 accent-amber-500 bg-slate-950 border-slate-700' />
+                 Featured Specimen
                </label>
-               <label className='flex items-center gap-2 text-sm font-medium cursor-pointer'>
-                 <input type='checkbox' {...register('isPublished')} />
-                 Published
+               <label className='flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer'>
+                 <input type='checkbox' {...register('isPublished')} className='w-4 h-4 rounded text-amber-500 accent-amber-500 bg-slate-950 border-slate-700' />
+                 Showcased Live
                </label>
             </div>
           </div>
@@ -245,24 +251,27 @@ export function ProductForm({ initialData, productId }: Props) {
 
         {/* Right Column: Images & Organization */}
         <div className='space-y-6'>
-          <div className='bg-white p-6 rounded-2xl border border-slate-200 space-y-4'>
-            <h3 className='font-bold text-slate-800 border-b border-slate-100 pb-3'>Images</h3>
+          <div className='bg-slate-900/90 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-sm'>
+            <h3 className='font-bold text-white border-b border-slate-800 pb-3 text-sm flex items-center justify-between'>
+              <span>Instrument Photographs</span>
+              <span className='text-[10px] text-slate-400 font-mono'>Max 5MB</span>
+            </h3>
             
             <div className='flex gap-2'>
               <div className='flex-1 relative'>
-                <LinkIcon className='absolute left-3 top-1/2 -translate-y-1/2 text-slate-400' size={16} />
+                <LinkIcon className='absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500' size={15} />
                 <input 
                   type='text'
                   value={imageUrlInput}
                   onChange={(e) => setImageUrlInput(e.target.value)}
-                  placeholder='Paste image URL'
-                  className='w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none'
+                  placeholder='/images/categories/general-surgery.png or URL'
+                  className='w-full pl-9 pr-3 py-2.5 text-xs bg-[#070e1e] border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:border-amber-400 outline-none font-mono'
                 />
               </div>
               <button 
                 type='button'
                 onClick={addImageUrl}
-                className='bg-slate-100 text-slate-700 font-bold px-4 py-2 rounded-lg text-xs hover:bg-slate-200 transition-colors'
+                className='bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs transition-colors shrink-0'
               >
                 Add URL
               </button>
@@ -279,80 +288,83 @@ export function ProductForm({ initialData, productId }: Props) {
               />
               <label 
                 htmlFor='file-upload'
-                className={`w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors ${
+                className={`w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer bg-[#070e1e]/40 hover:bg-[#070e1e] transition-all ${
                   isUploading ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {isUploading ? <Loader2 className='animate-spin text-blue-600' /> : <Upload className='text-slate-400 mb-2' />}
-                <span className='text-sm font-medium text-slate-600'>
-                  {isUploading ? 'Uploading...' : 'Click to upload image'}
+                {isUploading ? <Loader2 className='animate-spin text-amber-400 mb-2' size={24} /> : <Upload className='text-slate-400 mb-2' size={24} />}
+                <span className='text-xs font-semibold text-slate-300'>
+                  {isUploading ? 'Uploading to Server...' : 'Click to upload photograph'}
                 </span>
-                <span className='text-xs text-slate-400 mt-1'>Max size: 5MB</span>
+                <span className='text-[10px] text-slate-500 mt-1'>PNG, JPEG, WebP</span>
               </label>
             </div>
 
             {/* Image Preview Grid */}
             <div className='grid grid-cols-3 gap-3 pt-2'>
               {images.map((url, i) => (
-                <div key={i} className='relative group aspect-square rounded-lg overflow-hidden border border-slate-200'>
-                  <Image src={url} alt='Preview' fill className='object-cover' />
+                <div key={i} className='relative group aspect-square rounded-xl overflow-hidden border border-slate-800 bg-[#070e1e] p-1.5 flex items-center justify-center'>
+                  <Image src={url} alt='Preview' fill className='object-contain p-2' />
                   <button 
                     type='button'
                     onClick={() => removeImage(i)}
-                    className='absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity'
+                    className='absolute top-1 right-1 bg-rose-600/90 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity'
+                    title='Remove image'
                   >
                     <X size={12} />
                   </button>
                 </div>
               ))}
             </div>
-            {errors.images && <p className='text-xs text-red-500'>{errors.images.message}</p>}
+            {errors.images && <p className='text-xs text-rose-400'>{errors.images.message}</p>}
           </div>
 
-          <div className='bg-white p-6 rounded-2xl border border-slate-200 space-y-4'>
-            <h3 className='font-bold text-slate-800 border-b border-slate-100 pb-3'>Organization</h3>
+          <div className='bg-slate-900/90 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-sm'>
+            <h3 className='font-bold text-white border-b border-slate-800 pb-3 text-sm'>
+              Classification & Discipline
+            </h3>
             
             <div>
-              <label className='text-sm font-medium block mb-1'>Category</label>
+              <label className='text-xs font-semibold text-slate-300 block mb-1.5'>Surgical Category *</label>
               <select 
                 {...register('category')}
-                className='w-full border rounded-lg px-3 py-2 text-sm bg-white'
+                className='w-full bg-[#070e1e] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-amber-400 outline-none'
               >
-                <option value=''>Select Category</option>
+                <option value=''>Select Surgical Category</option>
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  <option key={cat.id} value={cat.name} className='bg-slate-900 text-white'>{cat.name}</option>
                 ))}
               </select>
-              {errors.category && <p className='text-xs text-red-500 mt-1'>{errors.category.message}</p>}
+              {errors.category && <p className='text-xs text-rose-400 mt-1'>{errors.category.message}</p>}
             </div>
 
             <div>
-              <label className='text-sm font-medium block mb-1'>Sub Category (optional)</label>
+              <label className='text-xs font-semibold text-slate-300 block mb-1.5'>Sub Category (optional)</label>
               <input 
                 {...register('subCategory')}
-                placeholder='e.g. Scopes'
-                className='w-full border rounded-lg px-3 py-2 text-sm'
+                placeholder='e.g. Atraumatic Forceps, Bone Plates, Rongeurs'
+                className='w-full bg-[#070e1e] border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-amber-400 outline-none'
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className='flex items-center justify-end gap-4 border-t border-slate-200 pt-8'>
+      <div className='flex items-center justify-end gap-4 border-t border-slate-800 pt-6'>
         <button 
           type='button'
           onClick={() => router.back()}
-          className='px-6 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors'
+          className='px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors'
         >
           Cancel
         </button>
         <button 
           type='submit'
           disabled={isSubmitting}
-          className='bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-colors disabled:opacity-50'
+          className='bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50'
         >
-          {isSubmitting ? <Loader2 size={20} className='animate-spin' /> : <Save size={20} />}
-          {productId ? 'Update Product' : 'Save Product'}
+          {isSubmitting ? <Loader2 size={16} className='animate-spin' /> : <Save size={16} />}
+          <span>{productId ? 'Update Specifications' : 'Publish Instrument'}</span>
         </button>
       </div>
     </form>

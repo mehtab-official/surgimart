@@ -19,3 +19,26 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-track { background: #DBEAFE; }
 ::-webkit-scrollbar-thumb { background: #2563EB; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #1D4ED8; }
+
+/* Admin dark theme form inputs and browser autofill overrides */
+.admin-input,
+[data-admin-theme] input,
+[data-admin-theme] textarea,
+[data-admin-theme] select {
+  color-scheme: dark;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f8fafc;
+  -webkit-box-shadow: 0 0 0px 1000px #070e1e inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
