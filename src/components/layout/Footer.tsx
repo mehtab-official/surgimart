@@ -104,7 +104,7 @@ export function Footer() {
               </div>
               <div className='flex items-center gap-2.5'>
                 <Mail size={14} className='text-blue-400 shrink-0' />
-                <a href='mailto:submedortho@gmail.com' className='hover:text-white font-medium'>submedortho@gmail.com</a>
+                <a href='mailto:sales@submedortho.com' className='hover:text-white font-medium'>sales@submedortho.com</a>
               </div>
               <div className='flex items-center gap-2.5'>
                 <div className='w-3.5 h-3.5 rounded-full bg-[#0A66C2] flex items-center justify-center text-white shrink-0'>

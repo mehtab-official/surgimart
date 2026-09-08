@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: '1. How can I apply for a job at SubMedOrtho?',
-    a: 'Send your CV and a short introduction directly to submedortho@gmail.com. We will review your application and reach out if there is a suitable fit.'
+    a: 'Send your CV and a short introduction directly to sales@submedortho.com. We will review your application and reach out if there is a suitable fit.'
   },
   {
     q: '2. Do you offer training for new workers?',
@@ -221,11 +221,11 @@ export default function CareerPage() {
               </p>
               <div className='pt-2'>
                 <a
-                  href='mailto:submedortho@gmail.com?subject=Job Application - SubMedOrtho Career'
+                  href='mailto:sales@submedortho.com?subject=Job Application - SubMedOrtho Career'
                   className='inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-3 rounded-xl transition-colors shadow-sm'
                 >
                   <Mail size={14} />
-                  <span>Send Application to: submedortho@gmail.com</span>
+                  <span>Send Application to: sales@submedortho.com</span>
                 </a>
               </div>
             </div>

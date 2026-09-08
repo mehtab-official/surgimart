@@ -112,13 +112,13 @@ export function Navbar() {
 
             {/* Email */}
             <a 
-              href='mailto:submedortho@gmail.com' 
+              href='mailto:sales@submedortho.com' 
               className='flex items-center gap-2 text-slate-300 hover:text-white transition-colors font-medium'
             >
               <div className='w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-blue-400'>
                 <Mail size={13} />
               </div>
-              <span>submedortho@gmail.com</span>
+              <span>sales@submedortho.com</span>
             </a>
 
             {/* Instagram */}
@@ -686,7 +686,7 @@ export function Navbar() {
                 </div>
                 <div className='flex items-center gap-2 text-slate-700 font-medium'>
                   <Mail size={14} className='text-blue-600' />
-                  <span>submedortho@gmail.com</span>
+                  <span>sales@submedortho.com</span>
                 </div>
                 <div className='flex items-center gap-4 pt-1.5 border-t border-slate-200/60'>
                   <a 

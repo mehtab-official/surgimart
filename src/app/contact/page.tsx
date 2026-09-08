@@ -49,7 +49,7 @@ export default function ContactPage() {
       toast.success('Message sent to SubMedOrtho!')
       reset()
     } catch { 
-      toast.error('Failed to send message. Please email submedortho@gmail.com directly.') 
+      toast.error('Failed to send message. Please email sales@submedortho.com directly.') 
     } finally { 
       setLoading(false) 
     }
@@ -99,8 +99,8 @@ export default function ContactPage() {
               <a href='tel:+923273961505' className='px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold hover:bg-amber-500/30 transition-colors'>
                 +92 327 3961505
               </a>
-              <a href='mailto:submedortho@gmail.com' className='px-4 py-2 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 hover:text-white transition-colors'>
-                submedortho@gmail.com
+              <a href='mailto:sales@submedortho.com' className='px-4 py-2 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 hover:text-white transition-colors'>
+                sales@submedortho.com
               </a>
               <a href='https://pk.linkedin.com/in/submed-ortho-47439a425' target='_blank' rel='noopener noreferrer' className='px-4 py-2 rounded-xl bg-[#0A66C2]/30 text-sky-200 border border-[#0A66C2]/40 hover:text-white transition-colors flex items-center gap-1.5'>
                 <svg className='w-3 h-3 fill-current' viewBox='0 0 24 24'>
@@ -159,8 +159,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <div className='font-bold text-slate-900 text-sm'>Official Email</div>
-                      <a href='mailto:submedortho@gmail.com' className='text-blue-600 hover:underline font-semibold text-xs mt-0.5 block'>
-                        submedortho@gmail.com
+                      <a href='mailto:sales@submedortho.com' className='text-blue-600 hover:underline font-semibold text-xs mt-0.5 block'>
+                        sales@submedortho.com
                       </a>
                       <div className='text-[11px] text-slate-400 mt-0.5'>Formal quotes & tender responses in &lt; 24h</div>
                     </div>

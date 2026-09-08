@@ -54,7 +54,7 @@ const FAQ_CATEGORIES: FAQCategory[] = [
       },
       {
         q: '5. How can I contact SubMedOrtho?',
-        a: 'You can reach our export desk directly by email at submedortho@gmail.com, by phone/WhatsApp at +92 327 3961505, or through our online Request a Quote (RFQ) form. We also serve buyers through our established online marketplace channels.'
+        a: 'You can reach our export desk directly by email at sales@submedortho.com, by phone/WhatsApp at +92 327 3961505, or through our online Request a Quote (RFQ) form. We also serve buyers through our established online marketplace channels.'
       }
     ]
   },
@@ -118,7 +118,7 @@ const FAQ_CATEGORIES: FAQCategory[] = [
       },
       {
         q: '2. Can I contact your engineering team directly with custom specifications?',
-        a: 'Absolutely. We regularly produce custom OEM instruments, customized surgical sets, laser-marked branding, and bespoke dimensional variations. Message us directly at submedortho@gmail.com or submit a request on our Quote page.'
+        a: 'Absolutely. We regularly produce custom OEM instruments, customized surgical sets, laser-marked branding, and bespoke dimensional variations. Message us directly at sales@submedortho.com or submit a request on our Quote page.'
       }
     ]
   }
@@ -245,7 +245,7 @@ export default function FAQPage() {
                     </div>
                     <div className='flex items-center gap-2'>
                       <Mail size={13} className='text-blue-400' />
-                      <span>submedortho@gmail.com</span>
+                      <span>sales@submedortho.com</span>
                     </div>
                     <div className='flex items-center gap-2'>
                       <span className='w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-[8px] font-bold text-white'>IG</span>

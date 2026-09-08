@@ -393,7 +393,7 @@ export default function QuotePage() {
                     <Mail size={15} className='text-blue-400 shrink-0 mt-0.5' />
                     <div>
                       <div className='font-bold text-white'>Export Inquiries Email</div>
-                      <a href='mailto:submedortho@gmail.com' className='hover:text-blue-400'>submedortho@gmail.com</a>
+                      <a href='mailto:sales@submedortho.com' className='hover:text-blue-400'>sales@submedortho.com</a>
                     </div>
                   </div>
 
