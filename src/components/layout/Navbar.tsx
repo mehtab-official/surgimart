@@ -91,188 +91,36 @@ export function Navbar() {
 
   return (
     <header className={`sticky top-0 z-50 transition-all duration-200 ${scrolled ? 'shadow-md' : ''}`}>
-      
-      {/* ── TOP UTILITY STRIP (Enhanced height & prominence for phone, email, location & catalogue) ── */}
-      <div className='bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-slate-200 py-3 sm:py-3.5 border-b border-slate-800/80'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-y-2 gap-x-6'>
-          
-          {/* Left: Contact Information & Location Badge */}
-          <div className='flex items-center flex-wrap gap-4 sm:gap-7 text-xs sm:text-[13px]'>
-            
-            {/* Phone */}
-            <a 
-              href='tel:+923273961505' 
-              className='flex items-center gap-2 text-white hover:text-blue-400 transition-colors font-semibold'
-            >
-              <div className='w-7 h-7 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400'>
-                <Phone size={13} />
-              </div>
-              <span>+92 327 3961505</span>
-            </a>
-
-            {/* Email */}
-            <a 
-              href='mailto:sales@submedortho.com' 
-              className='flex items-center gap-2 text-slate-300 hover:text-white transition-colors font-medium'
-            >
-              <div className='w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-blue-400'>
-                <Mail size={13} />
-              </div>
-              <span>sales@submedortho.com</span>
-            </a>
-
-            {/* Instagram */}
-            <a 
-              href='https://www.instagram.com/submedortho' 
-              target='_blank'
-              rel='noopener noreferrer'
-              className='hidden sm:flex items-center gap-2 text-rose-300 hover:text-white transition-colors font-medium'
-            >
-              <div className='w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white'>
-                <Instagram size={13} />
-              </div>
-              <span>@submedortho</span>
-            </a>
-
-            {/* LinkedIn */}
-            <a 
-              href='https://pk.linkedin.com/in/submed-ortho-47439a425' 
-              target='_blank'
-              rel='noopener noreferrer'
-              className='flex items-center gap-2 text-sky-300 hover:text-white transition-colors font-medium'
-            >
-              <div className='w-7 h-7 rounded-full bg-[#0A66C2] flex items-center justify-center text-white shadow-sm'>
-                <svg className='w-3.5 h-3.5 fill-current' viewBox='0 0 24 24'>
-                  <path d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.63 1.63 0 1 0 0 3.26 1.63 1.63 0 0 0 0-3.26z' />
-                </svg>
-              </div>
-              <span className='hidden md:inline'>LinkedIn</span>
-            </a>
-
-            {/* Location & Manufacturing Hub Badge */}
-            <div className='hidden xl:flex items-center gap-2 text-slate-300 font-medium pl-3 border-l border-slate-700/80'>
-              <MapPin size={14} className='text-rose-400 shrink-0' />
-              <span>Sialkot, Pakistan <span className='text-slate-400 font-normal'>— Global Surgical & Orthopedic Export Hub</span></span>
-            </div>
-          </div>
-
-          {/* Right: PDF Catalogue Download, Currency & Account */}
-          <div className='flex items-center gap-3 sm:gap-5 text-xs sm:text-[13px]'>
-            
-            {/* Catalogue Direct Link Button */}
-            <Link 
-              href='/catalogue' 
-              className='flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 hover:border-blue-600 px-3 py-1.5 rounded-lg font-semibold transition-all shadow-sm'
-            >
-              <Download size={13} />
-              <span className='hidden sm:inline'>Product</span> Catalogue PDF
-            </Link>
-
-            {/* Currency selector */}
-            <select
-              value={currency}
-              onChange={e => setCurrency(e.target.value)}
-              aria-label='Select currency'
-              data-testid='currency-switcher'
-              className='bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 px-2.5 py-1.5 focus:outline-none cursor-pointer transition-colors'
-            >
-              {['USD', 'EUR', 'GBP', 'AED', 'PKR', 'SAR', 'QAR'].map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-
-            {/* Account / Sign In */}
-            {hasMounted && !isLoading && (
-              session?.user ? (
-                <div ref={userMenuRef} className='relative'>
-                  <button
-                    onClick={() => setUserMenuOpen(v => !v)}
-                    className='flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 transition-colors'
-                    data-testid='nav-user-avatar'
-                  >
-                    <User size={13} className='text-blue-400' />
-                    <span className='max-w-[80px] truncate'>{session.user.name || 'Account'}</span>
-                    <ChevronDown size={11} className={`transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  <AnimatePresence>
-                    {userMenuOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 4 }}
-                        className='absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 text-slate-800 text-xs'
-                      >
-                        <Link 
-                          href='/account' 
-                          onClick={() => setUserMenuOpen(false)}
-                          className='flex items-center gap-2 px-4 py-2 hover:bg-slate-50'
-                        >
-                          <User size={14} /> My Account
-                        </Link>
-                        {session.user.role === 'admin' && (
-                          <Link 
-                            href='/admin' 
-                            onClick={() => setUserMenuOpen(false)}
-                            className='flex items-center gap-2 px-4 py-2 hover:bg-slate-50 text-blue-600 font-semibold'
-                          >
-                            <LayoutDashboard size={14} /> Admin Panel
-                          </Link>
-                        )}
-                        <hr className='my-1.5 border-slate-100' />
-                        <button
-                          onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: '/' }) }}
-                          className='flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left font-semibold'
-                          data-testid='signout-btn'
-                        >
-                          <LogOut size={14} /> Sign Out
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <Link 
-                  href='/login' 
-                  data-testid='nav-signin' 
-                  className='bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 transition-colors'
-                >
-                  Sign In
-                </Link>
-              )
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* ── MAIN HEADER (Logo, Primary Nav, Search, RFQ Action) ── */}
       <div className='bg-white border-b border-slate-200'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-6'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3 lg:gap-6'>
           
           {/* Logo */}
-          <Link href='/' data-testid='nav-logo' className='shrink-0 flex items-center gap-3.5 group'>
+          <Link href='/' data-testid='nav-logo' className='shrink-0 flex items-center gap-2.5 group'>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src='/uploads/products/logo69.png' 
               alt='SubMedOrtho' 
-              className='h-16 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-sm' 
+              className='h-12 sm:h-14 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-sm' 
             />
-            <div className='hidden sm:block'>
-              <span className='block text-2xl font-black tracking-tight text-slate-900 leading-none'>
+            <div>
+              <span className='block text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-none'>
                 SubMed<span className='text-blue-600'>Ortho</span>
               </span>
-              <span className='block text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1'>
-                Precision Surgical & Orthopedic Export
+              <span className='block text-[10px] font-bold tracking-wider text-slate-500 uppercase mt-1'>
+                Surgical & Orthopedic Export
               </span>
             </div>
           </Link>
 
           {/* ── DESKTOP NAVIGATION ── */}
-          <nav className='hidden lg:flex items-center gap-1.5 xl:gap-2.5'>
+          <nav className='hidden lg:flex items-center justify-center gap-0.5 xl:gap-1.5 flex-1'>
             
             {/* Home */}
             <Link 
               href='/' 
-              className={`text-[15px] tracking-tight px-4 py-2.5 rounded-xl transition-all relative ${
+              className={`text-[14px] xl:text-[15px] tracking-tight px-3 xl:px-4 py-2 rounded-xl transition-all relative ${
                 isHomeActive 
                   ? 'text-blue-700 bg-blue-50/90 font-extrabold shadow-sm border border-blue-200/80 ring-1 ring-blue-500/20' 
                   : 'text-slate-800 hover:text-blue-700 hover:bg-slate-100/80 font-bold'
@@ -280,7 +128,7 @@ export function Navbar() {
             >
               Home
               {isHomeActive && (
-                <span className='absolute bottom-1 left-4 right-4 h-0.5 bg-blue-600 rounded-full' />
+                <span className='absolute bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full' />
               )}
             </Link>
 
@@ -293,16 +141,16 @@ export function Navbar() {
             >
               <button
                 onClick={() => setCompanyOpen(v => !v)}
-                className={`flex items-center gap-1.5 text-[15px] tracking-tight px-4 py-2.5 rounded-xl transition-all relative ${
+                className={`flex items-center gap-1 text-[14px] xl:text-[15px] tracking-tight px-3 xl:px-4 py-2 rounded-xl transition-all relative ${
                   isCompanyActive 
                     ? 'text-blue-700 bg-blue-50/90 font-extrabold shadow-sm border border-blue-200/80 ring-1 ring-blue-500/20' 
                     : 'text-slate-800 hover:text-blue-700 hover:bg-slate-100/80 font-bold'
                 }`}
               >
                 <span>Company</span>
-                <ChevronDown size={15} className={`transition-transform duration-200 ${companyOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`transition-transform duration-200 ${companyOpen ? 'rotate-180' : ''}`} />
                 {isCompanyActive && (
-                  <span className='absolute bottom-1 left-4 right-4 h-0.5 bg-blue-600 rounded-full' />
+                  <span className='absolute bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full' />
                 )}
               </button>
 
@@ -370,16 +218,16 @@ export function Navbar() {
             >
               <button
                 onClick={() => setProductsOpen(v => !v)}
-                className={`flex items-center gap-1.5 text-[15px] tracking-tight px-4 py-2.5 rounded-xl transition-all relative ${
+                className={`flex items-center gap-1 text-[14px] xl:text-[15px] tracking-tight px-3 xl:px-4 py-2 rounded-xl transition-all relative ${
                   isProductsActive 
                     ? 'text-blue-700 bg-blue-50/90 font-extrabold shadow-sm border border-blue-200/80 ring-1 ring-blue-500/20' 
                     : 'text-slate-800 hover:text-blue-700 hover:bg-slate-100/80 font-bold'
                 }`}
               >
                 <span>Products</span>
-                <ChevronDown size={15} className={`transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`} />
                 {isProductsActive && (
-                  <span className='absolute bottom-1 left-4 right-4 h-0.5 bg-blue-600 rounded-full' />
+                  <span className='absolute bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full' />
                 )}
               </button>
 
@@ -463,7 +311,7 @@ export function Navbar() {
             {/* Supply Chain */}
             <Link 
               href='/supply-chain' 
-              className={`text-[15px] tracking-tight px-4 py-2.5 rounded-xl transition-all relative ${
+              className={`text-[14px] xl:text-[15px] tracking-tight px-3 xl:px-4 py-2 rounded-xl transition-all relative ${
                 isSupplyChainActive 
                   ? 'text-blue-700 bg-blue-50/90 font-extrabold shadow-sm border border-blue-200/80 ring-1 ring-blue-500/20' 
                   : 'text-slate-800 hover:text-blue-700 hover:bg-slate-100/80 font-bold'
@@ -471,7 +319,7 @@ export function Navbar() {
             >
               Supply Chain
               {isSupplyChainActive && (
-                <span className='absolute bottom-1 left-4 right-4 h-0.5 bg-blue-600 rounded-full' />
+                <span className='absolute bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full' />
               )}
             </Link>
 
@@ -484,16 +332,16 @@ export function Navbar() {
             >
               <button
                 onClick={() => setInsightsOpen(v => !v)}
-                className={`flex items-center gap-1.5 text-[15px] tracking-tight px-4 py-2.5 rounded-xl transition-all relative ${
+                className={`flex items-center gap-1 text-[14px] xl:text-[15px] tracking-tight px-3 xl:px-4 py-2 rounded-xl transition-all relative ${
                   isInsightsActive 
                     ? 'text-blue-700 bg-blue-50/90 font-extrabold shadow-sm border border-blue-200/80 ring-1 ring-blue-500/20' 
                     : 'text-slate-800 hover:text-blue-700 hover:bg-slate-100/80 font-bold'
                 }`}
               >
                 <span>Insights</span>
-                <ChevronDown size={15} className={`transition-transform duration-200 ${insightsOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`transition-transform duration-200 ${insightsOpen ? 'rotate-180' : ''}`} />
                 {isInsightsActive && (
-                  <span className='absolute bottom-1 left-4 right-4 h-0.5 bg-blue-600 rounded-full' />
+                  <span className='absolute bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full' />
                 )}
               </button>
 
@@ -569,7 +417,7 @@ export function Navbar() {
             {/* Contact Us */}
             <Link 
               href='/contact' 
-              className={`text-[15px] tracking-tight px-4 py-2.5 rounded-xl transition-all relative ${
+              className={`text-[14px] xl:text-[15px] tracking-tight px-3 xl:px-4 py-2 rounded-xl transition-all relative ${
                 isContactActive 
                   ? 'text-blue-700 bg-blue-50/90 font-extrabold shadow-sm border border-blue-200/80 ring-1 ring-blue-500/20' 
                   : 'text-slate-800 hover:text-blue-700 hover:bg-slate-100/80 font-bold'
@@ -577,13 +425,13 @@ export function Navbar() {
             >
               Contact Us
               {isContactActive && (
-                <span className='absolute bottom-1 left-4 right-4 h-0.5 bg-blue-600 rounded-full' />
+                <span className='absolute bottom-1 left-3 right-3 h-0.5 bg-blue-600 rounded-full' />
               )}
             </Link>
           </nav>
 
-          {/* ── RIGHT ACTION AREA (Search Modal, Request Quote CTA) ── */}
-          <div className='flex items-center gap-3'>
+          {/* ── RIGHT ACTION AREA (Search Modal, Admin/Sign In, Request Quote CTA) ── */}
+          <div className='flex items-center gap-2.5 sm:gap-3'>
             
             {/* Search Trigger Button */}
             <button
@@ -608,6 +456,80 @@ export function Navbar() {
             >
               <FileText size={20} />
             </Link>
+
+            {/* Account / Admin / Sign In */}
+            {hasMounted && !isLoading && (
+              session?.user ? (
+                <div ref={userMenuRef} className='relative'>
+                  <button
+                    onClick={() => setUserMenuOpen(v => !v)}
+                    className='flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200/80 transition-colors shadow-sm'
+                    data-testid='nav-user-avatar'
+                  >
+                    <User size={15} className='text-blue-600' />
+                    <span className='max-w-[90px] truncate hidden md:inline'>{session.user.name || 'Account'}</span>
+                    <ChevronDown size={13} className={`transition-transform text-slate-500 ${userMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 4, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 4, scale: 0.96 }}
+                        transition={{ duration: 0.15 }}
+                        className='absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-200/80 py-2 z-50 text-slate-800 text-xs divide-y divide-slate-100'
+                      >
+                        <div className='px-4 py-2 bg-slate-50/70'>
+                          <p className='text-[11px] text-slate-400 font-semibold uppercase tracking-wider'>Signed in as</p>
+                          <p className='text-xs font-bold text-slate-900 truncate'>{session.user.name || session.user.email}</p>
+                          {session.user.role === 'admin' && (
+                            <span className='inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700'>
+                              Admin
+                            </span>
+                          )}
+                        </div>
+                        <div className='py-1'>
+                          <Link 
+                            href='/account' 
+                            onClick={() => setUserMenuOpen(false)}
+                            className='flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50 text-slate-700 font-semibold transition-colors'
+                          >
+                            <User size={15} className='text-slate-500' /> My Account
+                          </Link>
+                          {session.user.role === 'admin' && (
+                            <Link 
+                              href='/admin' 
+                              onClick={() => setUserMenuOpen(false)}
+                              className='flex items-center gap-2.5 px-4 py-2 hover:bg-blue-50/80 text-blue-600 font-bold transition-colors'
+                            >
+                              <LayoutDashboard size={15} /> Admin Panel
+                            </Link>
+                          )}
+                        </div>
+                        <div className='py-1'>
+                          <button
+                            onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: '/' }) }}
+                            className='flex items-center gap-2.5 px-4 py-2 text-red-600 hover:bg-red-50 w-full text-left font-semibold transition-colors'
+                            data-testid='signout-btn'
+                          >
+                            <LogOut size={15} /> Sign Out
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <Link 
+                  href='/login' 
+                  data-testid='nav-signin' 
+                  className='flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-2 rounded-xl border border-slate-200/80 transition-colors shadow-sm'
+                >
+                  <User size={14} className='text-blue-600' />
+                  <span>Sign In</span>
+                </Link>
+              )
+            )}
 
             {/* Primary Request a Quote Button */}
             <Link 
@@ -682,7 +604,7 @@ export function Navbar() {
               <div className='p-3.5 bg-slate-50 rounded-xl space-y-2 text-xs text-slate-600 border border-slate-100'>
                 <div className='flex items-center gap-2 font-semibold text-slate-900'>
                   <Phone size={14} className='text-blue-600' />
-                  <span>+92 327 3961505</span>
+                  <span>+92 340-6218274</span>
                 </div>
                 <div className='flex items-center gap-2 text-slate-700 font-medium'>
                   <Mail size={14} className='text-blue-600' />
@@ -853,7 +775,69 @@ export function Navbar() {
                 </Link>
               </div>
 
-              <div className='pt-3 border-t border-slate-100'>
+              {/* Mobile Account / Sign In */}
+              <div className='pt-2 border-t border-slate-100'>
+                {hasMounted && !isLoading && (
+                  session?.user ? (
+                    <div className='bg-slate-50 rounded-xl p-3 space-y-2 border border-slate-100'>
+                      <div className='flex items-center justify-between'>
+                        <div className='flex items-center gap-2'>
+                          <div className='w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs'>
+                            {session.user.name ? session.user.name[0].toUpperCase() : 'U'}
+                          </div>
+                          <div>
+                            <p className='text-xs font-bold text-slate-900'>{session.user.name || 'User Account'}</p>
+                            <p className='text-[10px] text-slate-500 truncate max-w-[150px]'>{session.user.email}</p>
+                          </div>
+                        </div>
+                        {session.user.role === 'admin' && (
+                          <span className='px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white'>
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                      <div className='grid grid-cols-2 gap-2 pt-1'>
+                        <Link
+                          href='/account'
+                          onClick={() => setMobileOpen(false)}
+                          className='flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 shadow-sm'
+                        >
+                          <User size={13} />
+                          <span>My Account</span>
+                        </Link>
+                        {session.user.role === 'admin' && (
+                          <Link
+                            href='/admin'
+                            onClick={() => setMobileOpen(false)}
+                            className='flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-blue-50 border border-blue-200 text-xs font-bold text-blue-700 shadow-sm'
+                          >
+                            <LayoutDashboard size={13} />
+                            <span>Admin Panel</span>
+                          </Link>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => { setMobileOpen(false); signOut({ callbackUrl: '/' }) }}
+                        className='w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors'
+                      >
+                        <LogOut size={13} />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <Link
+                      href='/login'
+                      onClick={() => setMobileOpen(false)}
+                      className='flex items-center justify-center gap-2 w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-2.5 rounded-xl border border-slate-200/80 transition-colors mb-2'
+                    >
+                      <User size={14} className='text-blue-600' />
+                      <span>Sign In / Admin Login</span>
+                    </Link>
+                  )
+                )}
+              </div>
+
+              <div className='pt-2 border-t border-slate-100'>
                 <Link 
                   href='/quote'
                   onClick={() => setMobileOpen(false)}

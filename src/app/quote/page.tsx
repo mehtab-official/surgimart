@@ -24,13 +24,11 @@ import toast from 'react-hot-toast'
 const quoteSchema = z.object({
   fullName: z.string().min(2, 'Name is required'),
   email: z.string().email('Valid work email is required'),
-  phone: z.string().min(5, 'Phone / WhatsApp is required'),
   organization: z.string().min(2, 'Clinic or Company name is required'),
   country: z.string().min(2, 'Country is required'),
   orderType: z.enum(['Standard Wholesale', 'Custom OEM / Private Label', 'Hospital Tender', 'Sample Order']),
   volumeTier: z.string().min(1, 'Please select estimated volume'),
   productCategories: z.array(z.string()).min(1, 'Select at least one product category'),
-  notes: z.string().min(10, 'Please describe product models, quantities, or custom requirements'),
 })
 
 type QuoteFormData = z.infer<typeof quoteSchema>
@@ -90,12 +88,11 @@ export default function QuotePage() {
         body: JSON.stringify({
           name: data.fullName,
           email: data.email,
-          phone: data.phone,
           company: data.organization,
           country: data.country,
           items: data.productCategories.join(', '),
           quantity: data.volumeTier,
-          message: `Order Type: ${data.orderType}\nNotes: ${data.notes}`
+          message: `Order Type: ${data.orderType}`
         })
       })
 
@@ -228,18 +225,6 @@ export default function QuotePage() {
 
                         <div>
                           <label className='block text-xs font-bold text-slate-700 mb-1.5'>
-                            Phone / WhatsApp *
-                          </label>
-                          <input
-                            {...register('phone')}
-                            placeholder='+1 234 567 8900'
-                            className='w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20'
-                          />
-                          {errors.phone && <p className='text-[11px] text-red-500 mt-1'>{errors.phone.message}</p>}
-                        </div>
-
-                        <div>
-                          <label className='block text-xs font-bold text-slate-700 mb-1.5'>
                             Company / Hospital Name *
                           </label>
                           <input
@@ -250,7 +235,7 @@ export default function QuotePage() {
                           {errors.organization && <p className='text-[11px] text-red-500 mt-1'>{errors.organization.message}</p>}
                         </div>
 
-                        <div className='sm:col-span-2'>
+                        <div>
                           <label className='block text-xs font-bold text-slate-700 mb-1.5'>
                             Destination Country / Region *
                           </label>
@@ -334,19 +319,6 @@ export default function QuotePage() {
                             <p className='text-[11px] text-red-500 mt-1'>{errors.productCategories.message}</p>
                           )}
                         </div>
-
-                        <div>
-                          <label className='block text-xs font-bold text-slate-700 mb-1.5'>
-                            Product Models, Quantities & Specific Tolerances *
-                          </label>
-                          <textarea
-                            rows={4}
-                            {...register('notes')}
-                            placeholder='Please list SKUs, instrument sizes (e.g. 14cm Kelly Forceps, 4mm Rongeurs), required steel grades (AISI 410/420), or OEM packaging needs...'
-                            className='w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20'
-                          />
-                          {errors.notes && <p className='text-[11px] text-red-500 mt-1'>{errors.notes.message}</p>}
-                        </div>
                       </div>
                     </div>
 
@@ -385,7 +357,7 @@ export default function QuotePage() {
                     <Phone size={15} className='text-blue-400 shrink-0 mt-0.5' />
                     <div>
                       <div className='font-bold text-white'>Phone / WhatsApp</div>
-                      <a href='tel:+923273961505' className='hover:text-blue-400'>+92 327 3961505</a>
+                      <a href='tel:+923406218274' className='hover:text-blue-400'>+92 340-6218274</a>
                     </div>
                   </div>
 

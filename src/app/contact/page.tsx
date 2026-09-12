@@ -96,8 +96,8 @@ export default function ContactPage() {
               Connect with our Sialkot manufacturing leadership and export sales team for general inquiries, catalogue requests, or custom OEM production.
             </p>
             <div className='flex flex-wrap gap-3 text-xs font-semibold text-slate-200'>
-              <a href='tel:+923273961505' className='px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold hover:bg-amber-500/30 transition-colors'>
-                +92 327 3961505
+              <a href='tel:+923406218274' className='px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold hover:bg-amber-500/30 transition-colors'>
+                +92 340-6218274
               </a>
               <a href='mailto:sales@submedortho.com' className='px-4 py-2 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 hover:text-white transition-colors'>
                 sales@submedortho.com
@@ -145,8 +145,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <div className='font-bold text-slate-900 text-sm'>Phone / WhatsApp</div>
-                      <a href='tel:+923273961505' className='text-blue-600 hover:underline font-semibold text-xs mt-0.5 block'>
-                        +92 327 3961505
+                      <a href='tel:+923406218274' className='text-blue-600 hover:underline font-semibold text-xs mt-0.5 block'>
+                        +92 340-6218274
                       </a>
                       <div className='text-[11px] text-slate-400 mt-0.5'>Mon–Sat: 9:00 AM – 6:00 PM (PKT / GMT+5)</div>
                     </div>
@@ -225,7 +225,7 @@ export default function ContactPage() {
                 {/* Direct Action Buttons: WhatsApp + LinkedIn + Instagram */}
                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2'>
                   <a
-                    href='https://wa.me/923273961505'
+                    href='https://wa.me/923406218274'
                     target='_blank'
                     rel='noopener noreferrer'
                     className='flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 rounded-xl transition-colors shadow-md text-center'

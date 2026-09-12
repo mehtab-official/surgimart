@@ -5,34 +5,34 @@ import { Calendar, MapPin, Globe2, ArrowRight, ExternalLink, Sparkles } from 'lu
 
 const EVENTS = [
   {
-    id: 'arab-health',
-    name: 'Arab Health Expo 2026',
-    location: 'Dubai World Trade Centre, UAE',
-    date: 'January 26 – 29, 2026',
+    id: 'health-asia-karachi',
+    name: 'Health Asia International Expo 2026',
+    location: 'Karachi Expo Centre, Karachi, Pakistan',
+    date: 'October 15 – 17, 2026',
     category: 'International Medical Trade Fair',
-    image: '/images/implants-trauma-plates.jpg',
-    description: 'Showcasing our precision orthopedic trauma plates, surgical bone rongeurs, and OEM manufacturing capabilities to Middle East & North Africa distributors.',
-    booth: 'Booth: Z2.B19'
+    image: '/images/image3.jpeg',
+    description: 'Showcasing our precision orthopedic trauma plates, surgical bone rongeurs, and OEM manufacturing capabilities directly manufactured in Sialkot.',
+    booth: 'Hall 2 / Stand B-14'
   },
   {
-    id: 'medica',
-    name: 'MEDICA Germany 2026',
-    location: 'Düsseldorf Exhibition Centre, Germany',
-    date: 'November 16 – 19, 2026',
-    category: 'World Forum for Medicine',
-    image: '/images/custom-surgical-kit.jpg',
-    description: 'Meeting European healthcare procurement leaders, private label buyers, and clinic directors with live demonstration of tungsten carbide instruments.',
-    booth: 'Hall 10 / Stand B42'
+    id: 'cmef-shanghai',
+    name: 'CMEF Shanghai Autumn 2026',
+    location: 'NECC Shanghai, China',
+    date: 'November 20 – 23, 2026',
+    category: 'China Medical Equipment Fair',
+    image: '/images/quality-step-01-cad.jpg',
+    description: 'Connecting with Asian hospital supply chains, titanium implant distributors, and contract manufacturing partners across the Asia-Pacific region.',
+    booth: 'Hall 6.1 / Stand K32'
   },
   {
-    id: 'expomed',
-    name: 'Expomed Eurasia',
-    location: 'Istanbul Expo Center, Turkey',
-    date: 'March 24 – 26, 2026',
-    category: 'Eurasian Health & Diagnostics',
+    id: 'canton-fair-guangzhou',
+    name: 'Canton Fair 2027 (Medical Pavilion)',
+    location: 'Canton Fair Complex (Pazhou), Guangzhou, China',
+    date: 'May 01 – 05, 2027',
+    category: 'China Import & Export Fair',
     image: '/images/surgical-instruments-blue.jpg',
-    description: 'Connecting with Central Asian and Eastern European hospital supply chains for surgical set tenders and customized hospital kits.',
-    booth: 'Hall 3 / Stand 312'
+    description: 'Meeting international healthcare procurement leaders and private label buyers with live demonstrations of ISO 13485 surgical grade instruments.',
+    booth: 'Hall 10.2 / Stand D18'
   }
 ]
 

@@ -126,15 +126,16 @@ export function EventsClient({ initialEvents }: Props) {
               <span>International Medical Trade Fairs & Expos</span>
             </div>
             <h1 className='text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight mb-6'>
-              Global Healthcare <span className='bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent'>Exhibitions</span>
+              Medical & Healthcare <span className='bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent'>Exhibitions</span>
             </h1>
             <p className='text-lg sm:text-xl text-slate-300 font-normal leading-relaxed mb-8 max-w-2xl'>
-              Explore premier international medical trade exhibitions across Germany, UAE, Turkey, and the Americas featuring surgical instrument innovations, ISO quality standards, and hospital procurement insights.
+              Connect with SubMedOrtho at premier medical and surgical trade exhibitions across Pakistan and China, featuring ISO-certified surgical instruments, orthopedic trauma implants, and OEM manufacturing agreements.
             </p>
             <div className='flex flex-wrap gap-3 text-xs font-semibold text-slate-300'>
-              <span className='px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur border border-white/10'>MEDICA Germany</span>
-              <span className='px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur border border-white/10'>WHX Dubai</span>
-              <span className='px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur border border-white/10'>FIME Miami</span>
+              <span className='px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur border border-white/10'>Health Asia Karachi</span>
+              <span className='px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur border border-white/10'>CMEF Shanghai</span>
+              <span className='px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur border border-white/10'>Health Asia Lahore</span>
+              <span className='px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur border border-white/10'>Canton Fair Guangzhou</span>
               <span className='px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30'>Distal Femoral Trauma Kits Showcase</span>
             </div>
           </div>

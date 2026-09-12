@@ -54,7 +54,7 @@ const FAQ_CATEGORIES: FAQCategory[] = [
       },
       {
         q: '5. How can I contact SubMedOrtho?',
-        a: 'You can reach our export desk directly by email at sales@submedortho.com, by phone/WhatsApp at +92 327 3961505, or through our online Request a Quote (RFQ) form. We also serve buyers through our established online marketplace channels.'
+        a: 'You can reach our export desk directly by email at sales@submedortho.com, by phone/WhatsApp at +92 340-6218274, or through our online Request a Quote (RFQ) form. We also serve buyers through our established online marketplace channels.'
       }
     ]
   },
@@ -241,7 +241,7 @@ export default function FAQPage() {
                   <div className='space-y-2 pt-1 text-xs text-slate-300'>
                     <div className='flex items-center gap-2'>
                       <Phone size={13} className='text-blue-400' />
-                      <span>+92 327 3961505</span>
+                      <span>+92 340-6218274</span>
                     </div>
                     <div className='flex items-center gap-2'>
                       <Mail size={13} className='text-blue-400' />

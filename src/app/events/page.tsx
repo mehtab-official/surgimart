@@ -4,7 +4,7 @@ import { GLOBAL_EXPOS_DATA } from '@/shared/data/events'
 
 export const metadata: Metadata = {
   title: 'Medical Expos & International Trade Fairs | SubMedOrtho',
-  description: 'Join SubMedOrtho at upcoming global medical exhibitions including MEDICA Germany, WHX Dubai, Expomed Eurasia, and FIME Miami.',
+  description: 'Join SubMedOrtho at upcoming medical exhibitions in Pakistan and China, including Health Asia Karachi, CMEF Shanghai, Health Asia Lahore, and Canton Fair Guangzhou.',
 }
 
 export default function EventsPage() {

@@ -22,103 +22,83 @@ export interface MedicalExpo {
 
 export const GLOBAL_EXPOS_DATA: MedicalExpo[] = [
   {
-    id: 'medica-2026',
-    title: 'MEDICA 2026 — Leading International Trade Fair',
-    shortName: 'MEDICA Germany',
-    organizer: 'Messe Düsseldorf',
-    category: 'World Forum for Medicine & Surgical Tech',
+    id: 'health-asia-karachi-2026',
+    title: 'Health Asia International Exhibition & Conferences 2026',
+    shortName: 'Health Asia Karachi',
+    organizer: 'Ecommerce Gateway Pakistan (Pvt) Ltd',
+    category: 'Pakistan’s Largest International Medical & Surgical Trade Fair',
+    image: '/images/image3.jpeg',
+    location: {
+      venue: 'Karachi Expo Centre, University Road',
+      city: 'Karachi',
+      country: 'Pakistan'
+    },
+    startDate: '2026-10-15',
+    endDate: '2026-10-17',
+    booth: 'Hall 2 — Stand B-14',
+    hall: 'Hall 2 (Surgical & Pharma)',
+    description: 'Pakistan’s premier international healthcare event certified by UFI (Paris). SubMedOrtho showcases export-grade orthopedic implants, tungsten carbide needle holders, and precision surgical sets directly manufactured in Sialkot.',
+    focusAreas: ['Orthopedic Implants', 'Surgical Instrument Sets', 'Hospital Tenders', 'OEM Export Partnerships'],
+    externalUrl: 'https://health-asia.com'
+  },
+  {
+    id: 'cmef-shanghai-2026',
+    title: 'CMEF Autumn 2026 — China International Medical Equipment Fair',
+    shortName: 'CMEF Shanghai',
+    organizer: 'Reed Sinopharm Exhibitions',
+    category: 'Asia-Pacific’s Premier Medical Device & Manufacturing Fair',
+    image: '/images/quality-step-01-cad.jpg',
+    location: {
+      venue: 'National Exhibition and Convention Center (NECC)',
+      city: 'Shanghai',
+      country: 'China'
+    },
+    startDate: '2026-11-20',
+    endDate: '2026-11-23',
+    booth: 'Booth 6.1-K32',
+    hall: 'Hall 6.1 (Surgery & Orthopedics)',
+    description: 'The world-renowned CMEF platform connects global healthcare leaders and medical device distributors across Asia. Explore SubMedOrtho’s titanium trauma systems, bone plates, and custom OEM manufacturing.',
+    focusAreas: ['Trauma Plating Systems', 'Precision Surgical Tools', 'Asian Medical Distribution', 'Contract Manufacturing'],
+    externalUrl: 'https://www.cmef.com.cn'
+  },
+  {
+    id: 'medhealth-lahore-2027',
+    title: 'Health Asia & Pharma Asia International Expo 2027',
+    shortName: 'Health Asia Lahore',
+    organizer: 'Ecommerce Gateway Pakistan',
+    category: 'Punjab Healthcare & Surgical Technology Convention',
     image: '/images/custom-surgical-kit.jpg',
     location: {
-      venue: 'Messe Düsseldorf Exhibition Centre',
-      city: 'Düsseldorf',
-      country: 'Germany'
+      venue: 'Expo Centre Lahore, Johar Town',
+      city: 'Lahore',
+      country: 'Pakistan'
     },
-    startDate: '2026-11-16',
-    endDate: '2026-11-19',
-    booth: 'Stand B42',
-    hall: 'Hall 10',
-    description: 'The world’s largest gathering for medical technology and hospital supply. SubMedOrtho showcases precision tungsten carbide needle holders, double action bone rongeurs, and titanium orthopedic plating systems.',
-    focusAreas: ['Surgical Instruments', 'Orthopedic Implants', 'Hospital Procurement', 'OEM Manufacturing'],
-    externalUrl: 'https://www.medica-tradefair.com'
+    startDate: '2027-04-08',
+    endDate: '2027-04-10',
+    booth: 'Stand A-22',
+    hall: 'Hall 1',
+    description: 'The regional powerhouse healthcare trade exhibition in Punjab. Meet SubMedOrtho engineering heads to evaluate hospital distributor agreements, custom laser engraving, and certified sterilization instrument kits.',
+    focusAreas: ['Hospital Procurement', 'Micro-Surgery Instruments', 'Distributor Contracts', 'Sterilization Cassettes'],
+    externalUrl: 'https://health-asia.com'
   },
   {
-    id: 'whx-dubai-2027',
-    title: 'World Health Expo 2027 (Formerly Arab Health)',
-    shortName: 'WHX Dubai 2027',
-    organizer: 'Informa Markets Healthcare',
-    category: 'Middle East & Global Healthcare Exhibition',
-    image: '/images/implants-trauma-plates.jpg',
-    location: {
-      venue: 'Dubai World Trade Centre & DEC',
-      city: 'Dubai',
-      country: 'United Arab Emirates'
-    },
-    startDate: '2027-01-25',
-    endDate: '2027-01-28',
-    booth: 'Booth Z2.B19',
-    hall: 'Za’abeel Hall 2',
-    description: 'The premier healthcare exhibition in the MENA region. Connect directly with SubMedOrtho directors for bulk hospital distributor contracts, custom laser branding, and international trade terms.',
-    focusAreas: ['Middle East Distribution', 'General Surgery Sets', 'ENT Microsurgery', 'ISO 13485 Compliance'],
-    externalUrl: 'https://www.worldhealthexpo.com'
-  },
-  {
-    id: 'ids-cologne-2027',
-    title: 'IDS 2027 — International Dental Show',
-    shortName: 'IDS Cologne',
-    organizer: 'Koelnmesse & GFDI',
-    category: 'World’s Leading Dental & Oral Surgery Fair',
+    id: 'canton-fair-guangzhou-2027',
+    title: 'Canton Fair 2027 — Medical Devices & Health Products',
+    shortName: 'Canton Fair Guangzhou',
+    organizer: 'China Foreign Trade Centre (CFTC)',
+    category: 'China Import & Export Fair (Medical Pavilion)',
     image: '/images/surgical-instruments-blue.jpg',
     location: {
-      venue: 'Koelnmesse Fairgrounds',
-      city: 'Cologne',
-      country: 'Germany'
+      venue: 'Canton Fair Complex (Pazhou), Haizhu District',
+      city: 'Guangzhou',
+      country: 'China'
     },
-    startDate: '2027-03-16',
-    endDate: '2027-03-20',
-    booth: 'Stand C-018',
-    hall: 'Hall 11.2',
-    description: 'Biennial international trade fair showcasing cutting-edge dental extraction forceps, periodontal curettes, and micro-suture instrument kits manufactured in Sialkot.',
-    focusAreas: ['Dental Surgery', 'Extraction Forceps', 'Periodontal Instruments', 'Sterilization Cassettes'],
-    externalUrl: 'https://www.ids-cologne.de'
-  },
-  {
-    id: 'expomed-eurasia-2027',
-    title: 'Expomed Eurasia 2027',
-    shortName: 'Expomed Istanbul',
-    organizer: 'Tüyap Fairs and Exhibitions',
-    category: 'Eurasian Medical & Hospital Equipment Trade Fair',
-    image: '/images/custom-titanium-tools.jpg',
-    location: {
-      venue: 'Tüyap Fair & Congress Center',
-      city: 'Istanbul',
-      country: 'Turkey'
-    },
-    startDate: '2027-04-15',
-    endDate: '2027-04-18',
-    booth: 'Stand 312',
-    hall: 'Hall 3',
-    description: 'The leading gateway into Central Asian and Eastern European medical markets. Demonstrations of surgical retractor systems, bone holding forceps, and orthopedic trauma kits.',
-    focusAreas: ['Eurasian Supply Chains', 'Orthopedic Trauma', 'Tender Procurement', 'Hospital Tenders'],
-    externalUrl: 'https://www.expomedistanbul.com'
-  },
-  {
-    id: 'fime-miami-2027',
-    title: 'FIME 2027 (WHX Americas)',
-    shortName: 'FIME Miami',
-    organizer: 'Informa Markets Healthcare',
-    category: 'Americas Leading Medical Trade Show',
-    image: '/images/implants-joint-replacement.jpg',
-    location: {
-      venue: 'Miami Beach Convention Center',
-      city: 'Miami, Florida',
-      country: 'United States'
-    },
-    startDate: '2027-06-16',
-    endDate: '2027-06-18',
-    booth: 'Booth J-45',
-    hall: 'Main Exhibition Hall',
-    description: 'Connecting with distributors across North America, Latin America, and the Caribbean. Explore custom OEM partnerships and US FDA compliant surgical instruments.',
-    focusAreas: ['North & Latin America', 'FDA Regulatory Support', 'Private Labeling', 'Trauma Systems'],
-    externalUrl: 'https://www.fimeshow.com'
+    startDate: '2027-05-01',
+    endDate: '2027-05-05',
+    booth: 'Booth 10.2D18',
+    hall: 'Hall 10.2 (Health & Medical Products)',
+    description: 'The historic and most influential trade fair in China. SubMedOrtho welcomes international delegations to examine our ISO 13485 surgical grade scissors, laparoscopic instruments, and orthopedic implants.',
+    focusAreas: ['Global Supply Chain', 'Laparoscopic Instruments', 'Private Labeling', 'ISO 13485 Certified Instruments'],
+    externalUrl: 'https://www.cantonfair.org.cn'
   }
 ]

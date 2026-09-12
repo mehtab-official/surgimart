@@ -363,10 +363,10 @@ export function Hero() {
                   <span className='hidden sm:inline text-[11px] text-blue-400 font-semibold'>Tap any image for specs</span>
                 </div>
                 <a 
-                  href='tel:+923273961505'
+                  href='tel:+923406218274'
                   className='text-amber-400 font-bold text-xs hover:underline'
                 >
-                  +92 327 3961505
+                  +92 340-6218274
                 </a>
               </div>
             </div>

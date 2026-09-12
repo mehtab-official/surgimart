@@ -146,7 +146,7 @@ export function ProductDetailClient({ product, related }: Props) {
                   </Link>
 
                   <a
-                    href={`https://wa.me/923273961505?text=Hello%20SubMedOrtho,%20I%20am%20interested%20in%20pricing%20for:%20${encodeURIComponent(product.name)}`}
+                    href={`https://wa.me/923406218274?text=Hello%20SubMedOrtho,%20I%20am%20interested%20in%20pricing%20for:%20${encodeURIComponent(product.name)}`}
                     target='_blank'
                     rel='noopener noreferrer'
                     className='bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md'
