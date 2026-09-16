@@ -35,11 +35,12 @@ type QuoteFormData = z.infer<typeof quoteSchema>
 
 const CATEGORIES_LIST = [
   'General Surgery (Forceps, Clamps, Scissors, Retractors)',
-  'Orthopedic Trauma & Bone Rongeurs',
-  'Titanium & 316L Bone Locking Plates & Screws',
-  'ENT Diagnostic & Micro Tools',
-  'Neuro / Spinal Surgery Sets',
-  'Dental Surgery & Extraction Instruments',
+  'Orthopedic Instruments & Implants (Bone Rongeurs, Cutters, Bone Holding)',
+  'Implants & Locking Plates (Distal Radius, LCP, Cortical Screws)',
+  'ENT Specialty Instruments (Hartmann Forceps, Suction Tubes, Specula)',
+  'Dental Surgery Instruments (Extraction Forceps, Root Elevators, Scalers)',
+  'Neuro & Spinal Surgery (Micro Forceps, Elevators, Retractors)',
+  'Veterinary Surgical & Implants (Bone Plates, Veterinary Kits)',
   'Custom OEM Set / Bespoke Blueprints'
 ]
 

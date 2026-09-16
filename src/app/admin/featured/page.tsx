@@ -60,12 +60,13 @@ export default function AdminFeaturedProductsPage() {
     try {
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       })
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || 'Upload failed')
+        throw new Error(data.error || `Upload failed with status ${res.status}`)
       }
 
       setItems(prev => prev.map(item => {

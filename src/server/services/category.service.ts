@@ -1,16 +1,25 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 
-const DEFAULT_CATEGORIES = [
-  { id: 'cat-1', name: 'General Surgery', slug: 'general-surgery' },
-  { id: 'cat-2', name: 'Orthopaedic', slug: 'orthopaedic' },
-  { id: 'cat-3', name: 'Dental Instruments', slug: 'dental' },
-  { id: 'cat-4', name: 'ENT Specialty', slug: 'ent' },
-  { id: 'cat-5', name: 'Neuro & Spinal', slug: 'neuro-spinal' },
-  { id: 'cat-6', name: 'Implants & Trauma', slug: 'implants-trauma' },
-  { id: 'cat-7', name: 'Surgical Implants & Prosthetics', slug: 'implants' },
-  { id: 'cat-8', name: 'Veterinary Surgical', slug: 'veterinary' },
+export const ESSENTIAL_CATEGORIES = [
+  { id: 'cat-1', name: 'General Surgery', slug: 'general-surgery', description: 'Hemostatic forceps, Mayo dissecting scissors, needle holders, and retractor sets.' },
+  { id: 'cat-2', name: 'Orthopaedic Instruments & Implants', slug: 'orthopaedic', description: 'Stille-Luer bone rongeurs, titanium locking plates, cortical screws & cutters.' },
+  { id: 'cat-3', name: 'Implants & Locking Plates', slug: 'implants', description: 'Titanium locking compression plates, cortical trauma screws, joint components.' },
+  { id: 'cat-4', name: 'ENT Specialty Instruments', slug: 'ent', description: 'Micro laryngeal suction tubes, Hartmann forceps, speculums, and mouth gags.' },
+  { id: 'cat-5', name: 'Dental Surgery Instruments', slug: 'dental', description: 'Extraction forceps, root elevators, periodontal scalers, and probe sets.' },
+  { id: 'cat-6', name: 'Neuro & Spinal Surgery', slug: 'neuro-spinal', description: 'Micro forceps, spinal elevators, dissectors, and Kerrison rongeurs.' },
+  { id: 'cat-7', name: 'Veterinary Surgical & Implants', slug: 'veterinary', description: 'Veterinary orthopedic bone plates, castrators, and trauma surgery kits.' },
 ]
+
+// In-memory runtime store for categories so custom edits persist even when offline/mock DB
+const runtimeCategoryStore = new Map<string, any>()
+for (const cat of ESSENTIAL_CATEGORIES) {
+  runtimeCategoryStore.set(cat.id, {
+    ...cat,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  })
+}
 
 export class CategoryService {
   async listCategories() {
@@ -21,10 +30,10 @@ export class CategoryService {
       if (dbCategories && dbCategories.length > 0) {
         return dbCategories
       }
-      return DEFAULT_CATEGORIES
+      return Array.from(runtimeCategoryStore.values())
     } catch (err) {
-      console.warn('DB error in CategoryService.listCategories, returning default categories:', err)
-      return DEFAULT_CATEGORIES
+      console.warn('DB error in CategoryService.listCategories, returning essential categories:', err)
+      return Array.from(runtimeCategoryStore.values())
     }
   }
 
@@ -34,21 +43,22 @@ export class CategoryService {
         where: { id },
       })
       if (cat) return cat
-      return DEFAULT_CATEGORIES.find(c => c.id === id || c.slug === id) || null
     } catch (err) {
-      console.warn('DB error in CategoryService.getCategoryById, returning default category:', err)
-      return DEFAULT_CATEGORIES.find(c => c.id === id || c.slug === id) || null
+      console.warn('DB error in CategoryService.getCategoryById, checking runtime store:', err)
     }
+    return runtimeCategoryStore.get(id) || Array.from(runtimeCategoryStore.values()).find(c => c.id === id || c.slug === id) || null
   }
 
   async createCategory(data: Prisma.CategoryCreateInput) {
     try {
-      return await prisma.category.create({
+      const created = await prisma.category.create({
         data,
       })
+      runtimeCategoryStore.set(created.id, created)
+      return created
     } catch (err) {
-      console.warn('DB error in createCategory, returning mock category:', err)
-      return {
+      console.warn('DB error in createCategory, saving to runtime store:', err)
+      const mockCategory = {
         id: `cat-${Date.now()}`,
         name: data.name,
         slug: data.slug,
@@ -57,38 +67,43 @@ export class CategoryService {
         createdAt: new Date(),
         updatedAt: new Date(),
       }
+      runtimeCategoryStore.set(mockCategory.id, mockCategory)
+      return mockCategory
     }
   }
 
   async updateCategory(id: string, data: Prisma.CategoryUpdateInput) {
     try {
-      return await prisma.category.update({
+      const updated = await prisma.category.update({
         where: { id },
         data,
       })
+      runtimeCategoryStore.set(updated.id, updated)
+      return updated
     } catch (err) {
-      console.warn('DB error in updateCategory, returning mock updated category:', err)
-      return {
+      console.warn('DB error in updateCategory, updating runtime store:', err)
+      const existing = await this.getCategoryById(id)
+      const updated = {
+        ...(existing || {}),
+        ...data,
         id,
-        name: data.name as string,
-        slug: data.slug as string,
-        icon: (data.icon as string) || null,
-        description: (data.description as string) || null,
-        createdAt: new Date(),
         updatedAt: new Date(),
       }
+      runtimeCategoryStore.set(id, updated)
+      return updated
     }
   }
 
   async deleteCategory(id: string) {
     try {
-      return await prisma.category.delete({
+      await prisma.category.delete({
         where: { id },
       })
     } catch (err) {
       console.warn('DB error in deleteCategory:', err)
-      return { id }
     }
+    runtimeCategoryStore.delete(id)
+    return { id }
   }
 }
 

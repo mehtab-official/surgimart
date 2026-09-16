@@ -23,10 +23,20 @@ interface Category {
   name: string
 }
 
+const ESSENTIAL_DISCIPLINES: Category[] = [
+  { id: 'cat-1', name: 'General Surgery' },
+  { id: 'cat-2', name: 'Orthopaedic Instruments & Implants' },
+  { id: 'cat-3', name: 'Implants & Locking Plates' },
+  { id: 'cat-4', name: 'ENT Specialty Instruments' },
+  { id: 'cat-5', name: 'Dental Surgery Instruments' },
+  { id: 'cat-6', name: 'Neuro & Spinal Surgery' },
+  { id: 'cat-7', name: 'Veterinary Surgical & Implants' },
+]
+
 export function ProductForm({ initialData, productId }: Props) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<Category[]>(ESSENTIAL_DISCIPLINES)
   const [images, setImages] = useState<string[]>(initialData?.images || [])
   const [imageUrlInput, setImageUrlInput] = useState('')
   const [isUploading, setIsUploading] = useState(false)
@@ -62,8 +72,14 @@ export function ProductForm({ initialData, productId }: Props) {
   useEffect(() => {
     fetch('/api/admin/categories', { credentials: 'include' })
       .then(res => res.json())
-      .then(data => setCategories(data))
-      .catch(err => console.error('Failed to load categories', err))
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategories(data)
+        }
+      })
+      .catch(err => {
+        console.warn('Using default essential categories in ProductForm:', err)
+      })
   }, [])
 
   useEffect(() => {
@@ -78,6 +94,8 @@ export function ProductForm({ initialData, productId }: Props) {
     const formData = new FormData()
     formData.append('file', file)
 
+    const toastId = toast.loading('Uploading photograph...')
+
     try {
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
@@ -85,18 +103,20 @@ export function ProductForm({ initialData, productId }: Props) {
         body: formData,
       })
       const data = await res.json()
-      if (data.url) {
+      if (res.ok && data.url) {
         setImages(prev => [...prev, data.url])
-        toast.success('Image uploaded')
+        toast.success('Photograph uploaded successfully!', { id: toastId })
       } else {
-        toast.error(data.error || 'Upload failed')
-        throw new Error(data.error)
+        const errorMsg = data.error || `Upload failed with HTTP ${res.status}`
+        toast.error(errorMsg, { id: toastId })
+        throw new Error(errorMsg)
       }
-    } catch (error) {
-      toast.error('Upload failed')
+    } catch (error: any) {
+      toast.error(error.message || 'Upload failed', { id: toastId })
       console.error(error)
     } finally {
       setIsUploading(false)
+      e.target.value = ''
     }
   }
 

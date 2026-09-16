@@ -9,13 +9,12 @@ import type { Product } from '@/types'
 const CATEGORIES = [
   { id: 'All', label: 'All Products' },
   { id: 'Surgical', label: 'General Surgery' },
-  { id: 'Orthopedic', label: 'Orthopaedic' },
-  { id: 'ENT', label: 'ENT Specialty' },
-  { id: 'Neuro-Spinal', label: 'Neuro / Spinal' },
-  { id: 'Implants', label: 'Implants & Plates' },
-  { id: 'Dental', label: 'Dental' },
-  { id: 'Veterinary', label: 'Veterinary' },
-  { id: 'Ophthalmology', label: 'Ophthalmology' },
+  { id: 'Orthopedic', label: 'Orthopaedic Instruments & Implants' },
+  { id: 'Implants', label: 'Implants & Locking Plates' },
+  { id: 'ENT', label: 'ENT Specialty Instruments' },
+  { id: 'Dental', label: 'Dental Surgery Instruments' },
+  { id: 'Neuro-Spinal', label: 'Neuro & Spinal Surgery' },
+  { id: 'Veterinary', label: 'Veterinary Surgical & Implants' },
 ]
 
 const SORT_OPTIONS = [

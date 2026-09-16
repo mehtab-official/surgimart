@@ -4,17 +4,10 @@ import Link from 'next/link'
 import { Tag, ArrowLeft } from 'lucide-react'
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal'
 
-const FALLBACK_CATEGORIES = [
-  { id: 'cat-1', name: 'General Surgery', slug: 'general-surgery' },
-  { id: 'cat-2', name: 'Orthopaedic', slug: 'orthopaedic' },
-  { id: 'cat-3', name: 'Dental Instruments', slug: 'dental' },
-  { id: 'cat-4', name: 'ENT Specialty', slug: 'ent' },
-  { id: 'cat-5', name: 'Neuro & Spinal', slug: 'neuro-spinal' },
-  { id: 'cat-6', name: 'Implants & Trauma', slug: 'implants-trauma' },
-]
+import { ESSENTIAL_CATEGORIES } from '@/server/services/category.service'
 
 export default async function AdminCategoriesPage() {
-  let categories: any[] = FALLBACK_CATEGORIES
+  let categories: any[] = ESSENTIAL_CATEGORIES
   try {
     const dbCategories = await prisma.category.findMany({
       orderBy: { name: 'asc' }

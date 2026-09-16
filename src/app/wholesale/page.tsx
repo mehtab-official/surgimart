@@ -19,7 +19,15 @@ const schema = z.object({
 })
 type FormData = z.infer<typeof schema>
 
-const CATEGORIES = ['Surgical', 'Dental', 'Orthopedic', 'Veterinary', 'ENT', 'Ophthalmology', 'Hospital Furniture']
+const CATEGORIES = [
+  'General Surgery',
+  'Orthopaedic Instruments & Implants',
+  'Implants & Locking Plates',
+  'ENT Specialty Instruments',
+  'Dental Surgery Instruments',
+  'Neuro & Spinal Surgery',
+  'Veterinary Surgical & Implants',
+]
 
 export default function WholesalePage() {
   const [submitted, setSubmitted] = useState(false)
