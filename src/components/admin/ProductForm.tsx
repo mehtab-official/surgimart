@@ -23,7 +23,8 @@ interface Category {
   name: string
 }
 
-const ESSENTIAL_DISCIPLINES: Category[] = [
+// These MUST match exactly what is shown on the public /shop page
+const SHOP_CATEGORIES: Category[] = [
   { id: 'cat-1', name: 'General Surgery' },
   { id: 'cat-2', name: 'Orthopaedic Instruments & Implants' },
   { id: 'cat-3', name: 'Implants & Locking Plates' },
@@ -36,7 +37,7 @@ const ESSENTIAL_DISCIPLINES: Category[] = [
 export function ProductForm({ initialData, productId }: Props) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [categories, setCategories] = useState<Category[]>(ESSENTIAL_DISCIPLINES)
+  const [categories] = useState<Category[]>(SHOP_CATEGORIES)
   const [images, setImages] = useState<string[]>(initialData?.images || [])
   const [imageUrlInput, setImageUrlInput] = useState('')
   const [isUploading, setIsUploading] = useState(false)
@@ -69,32 +70,7 @@ export function ProductForm({ initialData, productId }: Props) {
     }
   }, [name, setValue, productId])
 
-  useEffect(() => {
-    fetch('/api/admin/categories', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          // Merge fetched categories with ESSENTIAL_DISCIPLINES to guarantee General Surgery,
-          // Neuro & Spinal, Implants, and all core medical fields are always in the upload dropdown
-          const merged: Category[] = [...ESSENTIAL_DISCIPLINES]
-          data.forEach(dbCat => {
-            if (!dbCat?.name) return
-            const alreadyInList = merged.some(m => 
-              m.name.toLowerCase() === dbCat.name.toLowerCase() ||
-              (m.name.toLowerCase().includes('general surgery') && dbCat.name.toLowerCase() === 'surgical') ||
-              (m.name.toLowerCase().includes('orthopaedic') && dbCat.name.toLowerCase() === 'orthopedic')
-            )
-            if (!alreadyInList) {
-              merged.push({ id: dbCat.id || `cat-${dbCat.name}`, name: dbCat.name })
-            }
-          })
-          setCategories(merged)
-        }
-      })
-      .catch(err => {
-        console.warn('Using default essential categories in ProductForm:', err)
-      })
-  }, [])
+
 
   useEffect(() => {
     setValue('images', images)

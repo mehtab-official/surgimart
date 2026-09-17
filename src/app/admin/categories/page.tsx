@@ -1,18 +1,13 @@
-import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { Tag, ArrowLeft } from 'lucide-react'
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal'
 
-import { categoryService, ESSENTIAL_CATEGORIES } from '@/server/services/category.service'
+import { ESSENTIAL_CATEGORIES } from '@/server/services/category.service'
 
 export default async function AdminCategoriesPage() {
-  let categories: any[] = ESSENTIAL_CATEGORIES
-  try {
-    categories = await categoryService.listCategories()
-  } catch (err) {
-    console.warn('Error fetching categories in AdminCategoriesPage, using essential categories:', err)
-  }
+  // Always exactly the 7 categories matching the public shop page
+  const categories = ESSENTIAL_CATEGORIES
 
   return (
     <div className='space-y-6'>

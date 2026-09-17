@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 
+// These are the ONLY 7 categories shown on the public shop page - must match exactly
 export const ESSENTIAL_CATEGORIES = [
   { id: 'cat-1', name: 'General Surgery', slug: 'general-surgery', description: 'Hemostatic forceps, Mayo dissecting scissors, needle holders, and retractor sets.' },
   { id: 'cat-2', name: 'Orthopaedic Instruments & Implants', slug: 'orthopaedic', description: 'Stille-Luer bone rongeurs, titanium locking plates, cortical screws & cutters.' },
@@ -11,7 +12,7 @@ export const ESSENTIAL_CATEGORIES = [
   { id: 'cat-7', name: 'Veterinary Surgical & Implants', slug: 'veterinary', description: 'Veterinary orthopedic bone plates, castrators, and trauma surgery kits.' },
 ]
 
-// In-memory runtime store for categories so custom edits persist even when offline/mock DB
+// In-memory store initialized with the fixed 7 essential categories
 const runtimeCategoryStore = new Map<string, any>()
 for (const cat of ESSENTIAL_CATEGORIES) {
   runtimeCategoryStore.set(cat.id, {
@@ -23,51 +24,13 @@ for (const cat of ESSENTIAL_CATEGORIES) {
 
 export class CategoryService {
   async listCategories() {
-    try {
-      const dbCategories = await prisma.category.findMany({
-        orderBy: { name: 'asc' },
-      })
-      if (dbCategories && dbCategories.length > 0) {
-        // Disallowed non-medical categories
-        const disallowed = new Set(['hospital-furniture', 'disposable', 'emergency', 'laboratory'])
-        const filteredDb = dbCategories.filter(c => !disallowed.has(c.slug.toLowerCase()))
-
-        // Always guarantee all essential disciplines are present in the taxonomy
-        const resultList: any[] = [...filteredDb]
-
-        for (const essential of ESSENTIAL_CATEGORIES) {
-          const exists = resultList.some(c => {
-            const nameMatch = c.name.toLowerCase().includes(essential.name.toLowerCase()) ||
-                              essential.name.toLowerCase().includes(c.name.toLowerCase())
-            const slugMatch = c.slug.toLowerCase() === essential.slug.toLowerCase() ||
-                              (essential.slug === 'general-surgery' && c.slug.toLowerCase() === 'surgical') ||
-                              (essential.slug === 'orthopaedic' && c.slug.toLowerCase() === 'orthopedic') ||
-                              (essential.slug === 'implants' && (c.slug.toLowerCase() === 'implants' || c.slug.toLowerCase() === 'orthopedic')) ||
-                              (essential.slug === 'neuro-spinal' && c.slug.toLowerCase() === 'neuro-spinal')
-            return nameMatch || (slugMatch && c.name.toLowerCase() === essential.name.toLowerCase())
-          })
-
-          if (!exists) {
-            resultList.push({
-              id: essential.id,
-              name: essential.name,
-              slug: essential.slug,
-              description: essential.description,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            })
-          }
-        }
-
-        // Sort by name
-        resultList.sort((a, b) => a.name.localeCompare(b.name))
-        return resultList
-      }
-      return Array.from(runtimeCategoryStore.values())
-    } catch (err) {
-      console.warn('DB error in CategoryService.listCategories, returning essential categories:', err)
-      return Array.from(runtimeCategoryStore.values())
-    }
+    // ALWAYS return exactly the 7 categories shown on the public shop page.
+    // No extras from DB, no merged rows - strictly these 7 names.
+    return ESSENTIAL_CATEGORIES.map(cat => ({
+      ...cat,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }))
   }
 
   async getCategoryById(id: string) {
