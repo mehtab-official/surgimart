@@ -284,6 +284,22 @@ export function Navbar() {
                           <div className='text-xs text-slate-500'>Micro Forceps, Elevators, Dissectors, Curettes</div>
                         </Link>
                         <Link 
+                          href='/shop?cat=dental'
+                          onClick={() => setProductsOpen(false)}
+                          className='block px-2.5 py-2 rounded-lg hover:bg-blue-50/60 transition-colors'
+                        >
+                          <div className='text-sm font-bold text-slate-800'>Dental Surgery</div>
+                          <div className='text-xs text-slate-500'>Extraction Forceps, Root Elevators, Scalers</div>
+                        </Link>
+                        <Link 
+                          href='/shop?cat=veterinary'
+                          onClick={() => setProductsOpen(false)}
+                          className='block px-2.5 py-2 rounded-lg hover:bg-blue-50/60 transition-colors'
+                        >
+                          <div className='text-sm font-bold text-slate-800'>Veterinary Instruments</div>
+                          <div className='text-xs text-slate-500'>Bone Plates, Castrators, Surgical Kits</div>
+                        </Link>
+                        <Link 
                           href='/shop?cat=implants'
                           onClick={() => setProductsOpen(false)}
                           className='block px-2.5 py-2 rounded-lg hover:bg-blue-50/60 transition-colors'
@@ -708,6 +724,20 @@ export function Navbar() {
                   className='block py-1.5 px-6 text-sm text-slate-600 hover:text-blue-600'
                 >
                   Neuro / Spinal
+                </Link>
+                <Link 
+                  href='/shop?cat=dental' 
+                  onClick={() => setMobileOpen(false)} 
+                  className='block py-1.5 px-6 text-sm text-slate-600 hover:text-blue-600'
+                >
+                  Dental Surgery
+                </Link>
+                <Link 
+                  href='/shop?cat=veterinary' 
+                  onClick={() => setMobileOpen(false)} 
+                  className='block py-1.5 px-6 text-sm text-slate-600 hover:text-blue-600'
+                >
+                  Veterinary Instruments
                 </Link>
                 <Link 
                   href='/shop?cat=implants' 

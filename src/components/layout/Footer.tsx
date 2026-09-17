@@ -148,6 +148,8 @@ export function Footer() {
               <li><Link href='/shop?cat=general-surgery' className='hover:text-white transition-colors'>General Surgery Forceps</Link></li>
               <li><Link href='/shop?cat=orthopaedic' className='hover:text-white transition-colors'>Orthopaedic Bone Rongeurs</Link></li>
               <li><Link href='/shop?cat=ent' className='hover:text-white transition-colors'>ENT Specialty Tools</Link></li>
+              <li><Link href='/shop?cat=dental' className='hover:text-white transition-colors'>Dental Surgery Instruments</Link></li>
+              <li><Link href='/shop?cat=veterinary' className='hover:text-white transition-colors'>Veterinary Bone Plates & Kits</Link></li>
               <li><Link href='/shop?cat=neuro-spinal' className='hover:text-white transition-colors'>Neuro & Spine Instruments</Link></li>
               <li><Link href='/shop?cat=implants' className='hover:text-white transition-colors'>Locking Plates & Screws</Link></li>
               <li><Link href='/catalogue' className='hover:text-white text-blue-400 font-semibold transition-colors'>Download 2026 Catalogue</Link></li>

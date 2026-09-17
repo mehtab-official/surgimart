@@ -28,8 +28,16 @@ export class CategoryService {
         orderBy: { name: 'asc' },
       })
       if (dbCategories && dbCategories.length > 0) {
-        const essentialSlugs = new Set(ESSENTIAL_CATEGORIES.map(c => c.slug))
-        const filtered = dbCategories.filter(c => essentialSlugs.has(c.slug))
+        // Allowed essential medical categories including legacy synonyms
+        const essentialSlugs = new Set([
+          ...ESSENTIAL_CATEGORIES.map(c => c.slug),
+          'surgical', 'orthopedic', 'general-surgery', 'orthopaedic', 'implants', 'ent', 'dental', 'neuro-spinal', 'veterinary', 'cardiovascular', 'ophthalmology'
+        ])
+        const filtered = dbCategories.filter(c => {
+          const s = c.slug.toLowerCase()
+          if (s === 'hospital-furniture' || s === 'disposable' || s === 'emergency' || s === 'laboratory') return false
+          return essentialSlugs.has(s) || ESSENTIAL_CATEGORIES.some(ec => c.name.toLowerCase().includes(ec.name.toLowerCase()))
+        })
         return filtered.length > 0 ? filtered : ESSENTIAL_CATEGORIES
       }
       return Array.from(runtimeCategoryStore.values())

@@ -12,12 +12,17 @@ export default async function AdminCategoriesPage() {
     const dbCategories = await prisma.category.findMany({
       orderBy: { name: 'asc' }
     })
-    if (dbCategories && dbCategories.length > 0) {
-      // Filter out legacy duplicates if present in database, preserving essential ones
-      const essentialSlugs = new Set(ESSENTIAL_CATEGORIES.map(c => c.slug))
-      const filtered = dbCategories.filter(c => essentialSlugs.has(c.slug))
+      // Filter out non-medical categories (e.g. hospital furniture) while preserving all essential disciplines
+      const essentialSlugs = new Set([
+        ...ESSENTIAL_CATEGORIES.map(c => c.slug),
+        'surgical', 'orthopedic', 'general-surgery', 'orthopaedic', 'implants', 'ent', 'dental', 'neuro-spinal', 'veterinary', 'cardiovascular', 'ophthalmology'
+      ])
+      const filtered = dbCategories.filter(c => {
+        const s = c.slug.toLowerCase()
+        if (s === 'hospital-furniture' || s === 'disposable' || s === 'emergency' || s === 'laboratory') return false
+        return essentialSlugs.has(s) || ESSENTIAL_CATEGORIES.some(ec => c.name.toLowerCase().includes(ec.name.toLowerCase()))
+      })
       categories = filtered.length > 0 ? filtered : ESSENTIAL_CATEGORIES
-    }
   } catch (err) {
     console.warn('Prisma DB query failed in AdminCategoriesPage, using default categories:', err)
   }
