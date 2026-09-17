@@ -74,7 +74,21 @@ export function ProductForm({ initialData, productId }: Props) {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          setCategories(data)
+          // Merge fetched categories with ESSENTIAL_DISCIPLINES to guarantee General Surgery,
+          // Neuro & Spinal, Implants, and all core medical fields are always in the upload dropdown
+          const merged: Category[] = [...ESSENTIAL_DISCIPLINES]
+          data.forEach(dbCat => {
+            if (!dbCat?.name) return
+            const alreadyInList = merged.some(m => 
+              m.name.toLowerCase() === dbCat.name.toLowerCase() ||
+              (m.name.toLowerCase().includes('general surgery') && dbCat.name.toLowerCase() === 'surgical') ||
+              (m.name.toLowerCase().includes('orthopaedic') && dbCat.name.toLowerCase() === 'orthopedic')
+            )
+            if (!alreadyInList) {
+              merged.push({ id: dbCat.id || `cat-${dbCat.name}`, name: dbCat.name })
+            }
+          })
+          setCategories(merged)
         }
       })
       .catch(err => {

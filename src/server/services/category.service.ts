@@ -28,17 +28,40 @@ export class CategoryService {
         orderBy: { name: 'asc' },
       })
       if (dbCategories && dbCategories.length > 0) {
-        // Allowed essential medical categories including legacy synonyms
-        const essentialSlugs = new Set([
-          ...ESSENTIAL_CATEGORIES.map(c => c.slug),
-          'surgical', 'orthopedic', 'general-surgery', 'orthopaedic', 'implants', 'ent', 'dental', 'neuro-spinal', 'veterinary', 'cardiovascular', 'ophthalmology'
-        ])
-        const filtered = dbCategories.filter(c => {
-          const s = c.slug.toLowerCase()
-          if (s === 'hospital-furniture' || s === 'disposable' || s === 'emergency' || s === 'laboratory') return false
-          return essentialSlugs.has(s) || ESSENTIAL_CATEGORIES.some(ec => c.name.toLowerCase().includes(ec.name.toLowerCase()))
-        })
-        return filtered.length > 0 ? filtered : ESSENTIAL_CATEGORIES
+        // Disallowed non-medical categories
+        const disallowed = new Set(['hospital-furniture', 'disposable', 'emergency', 'laboratory'])
+        const filteredDb = dbCategories.filter(c => !disallowed.has(c.slug.toLowerCase()))
+
+        // Always guarantee all essential disciplines are present in the taxonomy
+        const resultList: any[] = [...filteredDb]
+
+        for (const essential of ESSENTIAL_CATEGORIES) {
+          const exists = resultList.some(c => {
+            const nameMatch = c.name.toLowerCase().includes(essential.name.toLowerCase()) ||
+                              essential.name.toLowerCase().includes(c.name.toLowerCase())
+            const slugMatch = c.slug.toLowerCase() === essential.slug.toLowerCase() ||
+                              (essential.slug === 'general-surgery' && c.slug.toLowerCase() === 'surgical') ||
+                              (essential.slug === 'orthopaedic' && c.slug.toLowerCase() === 'orthopedic') ||
+                              (essential.slug === 'implants' && (c.slug.toLowerCase() === 'implants' || c.slug.toLowerCase() === 'orthopedic')) ||
+                              (essential.slug === 'neuro-spinal' && c.slug.toLowerCase() === 'neuro-spinal')
+            return nameMatch || (slugMatch && c.name.toLowerCase() === essential.name.toLowerCase())
+          })
+
+          if (!exists) {
+            resultList.push({
+              id: essential.id,
+              name: essential.name,
+              slug: essential.slug,
+              description: essential.description,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            })
+          }
+        }
+
+        // Sort by name
+        resultList.sort((a, b) => a.name.localeCompare(b.name))
+        return resultList
       }
       return Array.from(runtimeCategoryStore.values())
     } catch (err) {

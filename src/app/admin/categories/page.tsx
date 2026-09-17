@@ -4,27 +4,14 @@ import Link from 'next/link'
 import { Tag, ArrowLeft } from 'lucide-react'
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal'
 
-import { ESSENTIAL_CATEGORIES } from '@/server/services/category.service'
+import { categoryService, ESSENTIAL_CATEGORIES } from '@/server/services/category.service'
 
 export default async function AdminCategoriesPage() {
   let categories: any[] = ESSENTIAL_CATEGORIES
   try {
-    const dbCategories = await prisma.category.findMany({
-      orderBy: { name: 'asc' }
-    })
-      // Filter out non-medical categories (e.g. hospital furniture) while preserving all essential disciplines
-      const essentialSlugs = new Set([
-        ...ESSENTIAL_CATEGORIES.map(c => c.slug),
-        'surgical', 'orthopedic', 'general-surgery', 'orthopaedic', 'implants', 'ent', 'dental', 'neuro-spinal', 'veterinary', 'cardiovascular', 'ophthalmology'
-      ])
-      const filtered = dbCategories.filter(c => {
-        const s = c.slug.toLowerCase()
-        if (s === 'hospital-furniture' || s === 'disposable' || s === 'emergency' || s === 'laboratory') return false
-        return essentialSlugs.has(s) || ESSENTIAL_CATEGORIES.some(ec => c.name.toLowerCase().includes(ec.name.toLowerCase()))
-      })
-      categories = filtered.length > 0 ? filtered : ESSENTIAL_CATEGORIES
+    categories = await categoryService.listCategories()
   } catch (err) {
-    console.warn('Prisma DB query failed in AdminCategoriesPage, using default categories:', err)
+    console.warn('Error fetching categories in AdminCategoriesPage, using essential categories:', err)
   }
 
   return (
