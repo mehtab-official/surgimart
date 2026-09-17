@@ -316,7 +316,7 @@ export function ProductForm({ initialData, productId }: Props) {
                 type='file'
                 id='file-upload'
                 className='hidden'
-                accept='image/*'
+                accept='image/*,video/mp4,video/webm,video/ogg,video/quicktime'
                 onChange={onImageUpload}
                 disabled={isUploading}
               />
@@ -328,27 +328,34 @@ export function ProductForm({ initialData, productId }: Props) {
               >
                 {isUploading ? <Loader2 className='animate-spin text-amber-400 mb-2' size={24} /> : <Upload className='text-slate-400 mb-2' size={24} />}
                 <span className='text-xs font-semibold text-slate-300'>
-                  {isUploading ? 'Uploading to Server...' : 'Click to upload photograph'}
+                  {isUploading ? 'Uploading to Server...' : 'Click to upload photograph or video'}
                 </span>
-                <span className='text-[10px] text-slate-500 mt-1'>PNG, JPEG, WebP</span>
+                <span className='text-[10px] text-slate-500 mt-1'>PNG, JPEG, WebP, SVG, MP4, WebM (up to 100MB)</span>
               </label>
             </div>
 
-            {/* Image Preview Grid */}
+            {/* Image & Video Preview Grid */}
             <div className='grid grid-cols-3 gap-3 pt-2'>
-              {images.map((url, i) => (
-                <div key={i} className='relative group aspect-square rounded-xl overflow-hidden border border-slate-800 bg-[#070e1e] p-1.5 flex items-center justify-center'>
-                  <Image src={url} alt='Preview' fill className='object-contain p-2' />
-                  <button 
-                    type='button'
-                    onClick={() => removeImage(i)}
-                    className='absolute top-1 right-1 bg-rose-600/90 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity'
-                    title='Remove image'
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
+              {images.map((url, i) => {
+                const isVideo = url.match(/\.(mp4|webm|ogg|mov|mkv)(\?.*)?$/i) || url.includes('/videos/')
+                return (
+                  <div key={i} className='relative group aspect-square rounded-xl overflow-hidden border border-slate-800 bg-[#070e1e] p-1.5 flex items-center justify-center'>
+                    {isVideo ? (
+                      <video src={url} controls className='w-full h-full object-cover rounded-lg' />
+                    ) : (
+                      <Image src={url} alt='Preview' fill className='object-contain p-2' />
+                    )}
+                    <button 
+                      type='button'
+                      onClick={() => removeImage(i)}
+                      className='absolute top-1 right-1 bg-rose-600/90 hover:bg-rose-500 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10'
+                      title='Remove media'
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )
+              })}
             </div>
             {errors.images && <p className='text-xs text-rose-400'>{errors.images.message}</p>}
           </div>
