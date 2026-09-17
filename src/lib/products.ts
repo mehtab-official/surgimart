@@ -243,7 +243,8 @@ export async function getFeaturedProducts(): Promise<Product[]> {
       orderBy: { createdAt: 'desc' },
     })
     if (dbProds && dbProds.length > 0) {
-      return dbProds.map(mapDbProduct)
+      const mapped = dbProds.map(mapDbProduct).filter((p): p is Product => p !== null)
+      if (mapped.length > 0) return mapped
     }
     return FALLBACK_PRODUCTS
   } catch (error) {
@@ -276,7 +277,8 @@ export async function getAllProducts(options?: {
       prisma.product.count({ where }),
     ])
     if (dbProds && dbProds.length > 0) {
-      return { products: dbProds.map(mapDbProduct), total }
+      const mapped = dbProds.map(mapDbProduct).filter((p): p is Product => p !== null)
+      if (mapped.length > 0) return { products: mapped, total: mapped.length }
     }
     return filterFallback(options?.category)
   } catch (error) {
@@ -284,8 +286,11 @@ export async function getAllProducts(options?: {
   }
 }
 
-function mapDbProduct(p: any): Product {
-  const stock = typeof p.stock === 'number' ? p.stock : 100
+function mapDbProduct(p: any): Product | null {
+  const stock = typeof p.stockCount === 'number' ? p.stockCount : (typeof p.stock === 'number' ? p.stock : 100)
+  const mappedCategory = normalizeCategory(p.category || '')
+  // Skip products that belong to non-essential / excessive categories
+  if (!mappedCategory) return null
   return {
     id: p.id,
     name: p.name,
@@ -294,15 +299,15 @@ function mapDbProduct(p: any): Product {
     price: p.price,
     oldPrice: p.comparePrice,
     images: p.images && p.images.length > 0 ? p.images : ['/uploads/products/Forceps.png'],
-    category: p.category,
+    category: mappedCategory,
     inStock: stock > 0,
     stockCount: stock > 0 ? stock : 150,
     sku: p.sku,
     rating: p.rating || 5.0,
-    reviewCount: p.ratingCount || 12,
+    reviewCount: p.reviewCount || 12,
     isFeatured: p.isFeatured ?? true,
     isPublished: p.isPublished ?? true,
-    moq: p.minOrderQty || 5,
+    moq: p.moq || 5,
     specifications: [
       { key: 'Material', value: 'AISI 410 / 420 Stainless Steel' },
       { key: 'Standard', value: 'ISO 9001:2015 & ISO 13485:2016' },
@@ -312,17 +317,19 @@ function mapDbProduct(p: any): Product {
   }
 }
 
-function normalizeCategory(cat: string): string {
-  const c = cat.toLowerCase().replace(/[-_\s]/g, '')
-  if (c.includes('general') || c.includes('surg')) return 'surgical'
-  if (c.includes('ortho')) return 'orthopedic'
-  if (c.includes('dent')) return 'dental'
-  if (c.includes('vet')) return 'veterinary'
-  if (c.includes('ent')) return 'ent'
-  if (c.includes('neuro') || c.includes('spin')) return 'neuro-spinal'
-  if (c.includes('implant') || c.includes('plat')) return 'implants'
-  if (c.includes('ophth')) return 'ophthalmology'
-  return c
+// Maps any DB category string to one of the exact 7 public shop categories.
+// Returns null if category doesn't belong to the 7 valid ones (product is hidden from shop).
+function normalizeCategory(cat: string): string | null {
+  const c = (cat || '').toLowerCase().replace(/[-_\s]/g, '')
+  if (c.includes('general') || c === 'surgical') return 'General Surgery'
+  if (c.includes('ortho')) return 'Orthopaedic Instruments & Implants'
+  if (c.includes('implant') || c.includes('lock') || c.includes('plate') || c.includes('screw')) return 'Implants & Locking Plates'
+  if (c.includes('ent') || c.includes('ear') || c.includes('nose') || c.includes('throat')) return 'ENT Specialty Instruments'
+  if (c.includes('dent')) return 'Dental Surgery Instruments'
+  if (c.includes('neuro') || c.includes('spin') || c.includes('spinal')) return 'Neuro & Spinal Surgery'
+  if (c.includes('vet') || c.includes('animal')) return 'Veterinary Surgical & Implants'
+  // Everything else (Disposable, Cardiovascular, Sterilization, Obstetric, etc.) is excluded
+  return null
 }
 
 function filterFallback(category?: string): { products: Product[]; total: number } {
@@ -358,7 +365,7 @@ export async function getRelatedProducts(slug: string, category?: string): Promi
       },
       take: 4,
     })
-    if (dbProds && dbProds.length > 0) return dbProds.map(mapDbProduct)
+    if (dbProds && dbProds.length > 0) return dbProds.map(mapDbProduct).filter((p): p is Product => p !== null)
     return FALLBACK_PRODUCTS.filter(p => p.slug !== slug).slice(0, 4)
   } catch (error) {
     return FALLBACK_PRODUCTS.filter(p => p.slug !== slug).slice(0, 4)
