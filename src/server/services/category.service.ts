@@ -28,7 +28,9 @@ export class CategoryService {
         orderBy: { name: 'asc' },
       })
       if (dbCategories && dbCategories.length > 0) {
-        return dbCategories
+        const essentialSlugs = new Set(ESSENTIAL_CATEGORIES.map(c => c.slug))
+        const filtered = dbCategories.filter(c => essentialSlugs.has(c.slug))
+        return filtered.length > 0 ? filtered : ESSENTIAL_CATEGORIES
       }
       return Array.from(runtimeCategoryStore.values())
     } catch (err) {

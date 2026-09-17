@@ -13,7 +13,10 @@ export default async function AdminCategoriesPage() {
       orderBy: { name: 'asc' }
     })
     if (dbCategories && dbCategories.length > 0) {
-      categories = dbCategories
+      // Filter out legacy duplicates if present in database, preserving essential ones
+      const essentialSlugs = new Set(ESSENTIAL_CATEGORIES.map(c => c.slug))
+      const filtered = dbCategories.filter(c => essentialSlugs.has(c.slug))
+      categories = filtered.length > 0 ? filtered : ESSENTIAL_CATEGORIES
     }
   } catch (err) {
     console.warn('Prisma DB query failed in AdminCategoriesPage, using default categories:', err)
