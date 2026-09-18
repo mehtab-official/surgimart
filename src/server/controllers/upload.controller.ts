@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/server/middlewares'
 import { v2 as cloudinary } from 'cloudinary'
 
+import { SUPPORTED_VIDEO_EXTENSIONS, SUPPORTED_VIDEO_MIME_TYPES, getVideoMimeType } from '@/lib/media'
+
 const ALLOWED_IMAGE_MIME_TYPES = new Set([
   'image/jpeg',
   'image/jpg',
@@ -12,15 +14,10 @@ const ALLOWED_IMAGE_MIME_TYPES = new Set([
   'image/gif',
   'image/svg+xml',
 ])
-const ALLOWED_VIDEO_MIME_TYPES = new Set([
-  'video/mp4',
-  'video/webm',
-  'video/ogg',
-  'video/quicktime',
-  'video/x-matroska',
-])
+
+const ALLOWED_VIDEO_MIME_TYPES = SUPPORTED_VIDEO_MIME_TYPES
 const ALLOWED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'])
-const ALLOWED_VIDEO_EXTENSIONS = new Set(['mp4', 'webm', 'ogg', 'mov', 'mkv'])
+const ALLOWED_VIDEO_EXTENSIONS = SUPPORTED_VIDEO_EXTENSIONS
 
 const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024 // 20MB
 const MAX_VIDEO_SIZE_BYTES = 100 * 1024 * 1024 // 100MB
@@ -81,7 +78,7 @@ export class UploadController {
 
       if (!isVideo && !isImage) {
         return NextResponse.json(
-          { error: `Invalid file format (${fileType || rawExt}). Supported: JPEG, PNG, WebP, GIF, SVG, MP4, WebM, MOV.` },
+          { error: `Invalid file format (${fileType || rawExt || 'unknown'}). Supported: Images (JPEG, PNG, WebP, GIF, SVG) and Videos (MP4, WebM, MOV, MKV, AVI, WMV, M4V, FLV, 3GP, TS, MPEG).` },
           { status: 415 }
         )
       }
@@ -95,6 +92,7 @@ export class UploadController {
       }
 
       const safeExt = rawExt || (isVideo ? 'mp4' : 'png')
+      const mime = fileType || (isVideo ? getVideoMimeType(safeExt) : 'image/png')
 
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
@@ -106,7 +104,7 @@ export class UploadController {
             api_key: process.env.CLOUDINARY_API_KEY,
             api_secret: process.env.CLOUDINARY_API_SECRET,
           })
-          const base64 = `data:${fileType || (isVideo ? 'video/mp4' : 'image/png')};base64,${buffer.toString('base64')}`
+          const base64 = `data:${mime};base64,${buffer.toString('base64')}`
           const result = await cloudinary.uploader.upload(base64, {
             folder: isVideo ? 'surgimart/videos' : 'surgimart/products',
             resource_type: isVideo ? 'video' : 'image',

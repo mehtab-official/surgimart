@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { productSchema } from '@/lib/validations'
 
 import { Product } from '@/types'
+import { ALL_MEDIA_FILE_ACCEPT, isVideoUrl } from '@/lib/media'
 
 type ProductFormData = z.infer<typeof productSchema>
 
@@ -84,7 +85,7 @@ export function ProductForm({ initialData, productId }: Props) {
     const formData = new FormData()
     formData.append('file', file)
 
-    const toastId = toast.loading('Uploading photograph...')
+    const toastId = toast.loading('Uploading media (photo or video)...')
 
     try {
       const res = await fetch('/api/admin/upload', {
@@ -95,14 +96,15 @@ export function ProductForm({ initialData, productId }: Props) {
       const data = await res.json()
       if (res.ok && data.url) {
         setImages(prev => [...prev, data.url])
-        toast.success('Photograph uploaded successfully!', { id: toastId })
+        toast.success(`${data.isVideo ? 'Video' : 'Photo'} uploaded successfully!`, { id: toastId })
       } else {
         const errorMsg = data.error || `Upload failed with HTTP ${res.status}`
         toast.error(errorMsg, { id: toastId })
         throw new Error(errorMsg)
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Upload failed', { id: toastId })
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Upload failed'
+      toast.error(msg, { id: toastId })
       console.error(error)
     } finally {
       setIsUploading(false)
@@ -292,7 +294,7 @@ export function ProductForm({ initialData, productId }: Props) {
                 type='file'
                 id='file-upload'
                 className='hidden'
-                accept='image/*,video/mp4,video/webm,video/ogg,video/quicktime'
+                accept={ALL_MEDIA_FILE_ACCEPT}
                 onChange={onImageUpload}
                 disabled={isUploading}
               />
@@ -306,18 +308,18 @@ export function ProductForm({ initialData, productId }: Props) {
                 <span className='text-xs font-semibold text-slate-300'>
                   {isUploading ? 'Uploading to Server...' : 'Click to upload photograph or video'}
                 </span>
-                <span className='text-[10px] text-slate-500 mt-1'>PNG, JPEG, WebP, SVG, MP4, WebM (up to 100MB)</span>
+                <span className='text-[10px] text-slate-500 mt-1'>Images (PNG, JPEG, WebP, SVG) & Videos (MP4, WebM, MOV, MKV, AVI, etc. up to 100MB)</span>
               </label>
             </div>
 
             {/* Image & Video Preview Grid */}
             <div className='grid grid-cols-3 gap-3 pt-2'>
               {images.map((url, i) => {
-                const isVideo = url.match(/\.(mp4|webm|ogg|mov|mkv)(\?.*)?$/i) || url.includes('/videos/')
+                const isVideo = isVideoUrl(url)
                 return (
                   <div key={i} className='relative group aspect-square rounded-xl overflow-hidden border border-slate-800 bg-[#070e1e] p-1.5 flex items-center justify-center'>
                     {isVideo ? (
-                      <video src={url} controls className='w-full h-full object-cover rounded-lg' />
+                      <video src={url} controls playsInline className='w-full h-full object-cover rounded-lg' />
                     ) : (
                       <Image src={url} alt='Preview' fill className='object-contain p-2' />
                     )}

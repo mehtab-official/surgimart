@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { ShowcaseItem } from '@/types'
+import { VIDEO_FILE_ACCEPT } from '@/lib/media'
 
 export default function AdminShowcasePage() {
   const [items, setItems] = useState<ShowcaseItem[]>([])
@@ -55,7 +56,7 @@ export default function AdminShowcasePage() {
     formData.append('file', file)
 
     setUploadingId(`${itemId}-${targetType}`)
-    const toastId = toast.loading(`Uploading ${targetType === 'video' ? 'video (MP4/WebM)' : 'poster image'}...`)
+    const toastId = toast.loading(`Uploading ${targetType === 'video' ? 'video file' : 'poster image'}...`)
 
     try {
       const res = await fetch('/api/admin/upload', {
@@ -86,8 +87,9 @@ export default function AdminShowcasePage() {
       }))
 
       toast.success(`${targetType === 'video' ? 'Video' : 'Poster'} uploaded successfully! Remember to save changes.`, { id: toastId })
-    } catch (err: any) {
-      toast.error(err.message || 'Upload failed', { id: toastId })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Upload failed'
+      toast.error(msg, { id: toastId })
     } finally {
       setUploadingId(null)
       e.target.value = ''
@@ -299,7 +301,7 @@ export default function AdminShowcasePage() {
                     <div>
                       <label className='block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5'>
                         <Video size={13} className='text-amber-400' />
-                        Upload Video (MP4, WebM up to 100MB):
+                        Upload Video (MP4, WebM, MOV, MKV, AVI, etc. up to 100MB):
                       </label>
                       <div className='flex items-center gap-2'>
                         <label className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer border transition-colors ${
@@ -311,7 +313,7 @@ export default function AdminShowcasePage() {
                           <span>{isUploadingVideo ? 'Uploading Video...' : (item.videoUrl ? 'Replace Video' : 'Choose Video File')}</span>
                           <input 
                             type='file' 
-                            accept='video/mp4,video/webm,video/ogg,video/quicktime' 
+                            accept={VIDEO_FILE_ACCEPT} 
                             className='hidden' 
                             disabled={isUploadingVideo}
                             onChange={(e) => handleFileUpload(e, item.id, 'video')} 

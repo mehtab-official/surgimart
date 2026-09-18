@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ZoomIn, FileText, Phone, Mail, MessageSquare, ShieldCheck, CheckCircle2, Award, Clock } from 'lucide-react'
+import { ZoomIn, FileText, Phone, Mail, MessageSquare, ShieldCheck, CheckCircle2, Award, Clock, Video } from 'lucide-react'
 import { StarRating } from '@/components/ui/StarRating'
 import { ProductGrid } from '@/components/product/ProductGrid'
 import { ZoomModal } from '@/components/product/ZoomModal'
 import { QuoteModal } from '@/components/product/QuoteModal'
 import type { Product } from '@/types'
+import { isVideoUrl } from '@/lib/media'
 
 interface Props { 
   product: Product
@@ -52,38 +53,65 @@ export function ProductDetailClient({ product, related }: Props) {
             {/* Left: Image Showcase & Gallery */}
             <div className='lg:col-span-6 space-y-4'>
               <div 
-                className='relative bg-slate-50 rounded-3xl overflow-hidden h-96 sm:h-[420px] cursor-zoom-in border border-slate-100 flex items-center justify-center' 
+                className='relative bg-slate-50 rounded-3xl overflow-hidden h-96 sm:h-[420px] border border-slate-100 flex items-center justify-center' 
                 data-testid='product-image'
-                onClick={() => setZoomOpen(true)}
               >
-                <Image 
-                  src={currentImage} 
-                  alt={product.name} 
-                  fill 
-                  className='object-contain p-8' 
-                />
-                <button 
-                  className='absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-2xl shadow hover:bg-white transition-all text-slate-700'
-                  aria-label='Zoom image'
-                >
-                  <ZoomIn size={18} />
-                </button>
+                {isVideoUrl(currentImage) ? (
+                  <video 
+                    src={currentImage} 
+                    controls 
+                    playsInline 
+                    className='w-full h-full object-contain p-4' 
+                  />
+                ) : (
+                  <>
+                    <div 
+                      className='w-full h-full relative cursor-zoom-in'
+                      onClick={() => setZoomOpen(true)}
+                    >
+                      <Image 
+                        src={currentImage} 
+                        alt={product.name} 
+                        fill 
+                        className='object-contain p-8' 
+                      />
+                    </div>
+                    <button 
+                      onClick={() => setZoomOpen(true)}
+                      className='absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-2xl shadow hover:bg-white transition-all text-slate-700'
+                      aria-label='Zoom image'
+                    >
+                      <ZoomIn size={18} />
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* Thumbnails */}
               {product.images && product.images.length > 1 && (
                 <div className='flex gap-3 overflow-x-auto pb-2'>
-                  {product.images.map((img, i) => (
-                    <button 
-                      key={i} 
-                      onClick={() => setSelectedImage(i)}
-                      className={`w-20 h-20 rounded-2xl overflow-hidden border-2 shrink-0 bg-slate-50 transition-all ${
-                        i === selectedImage ? 'border-blue-600 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <Image src={img} alt='' width={80} height={80} className='object-contain p-2' />
-                    </button>
-                  ))}
+                  {product.images.map((img, i) => {
+                    const isVid = isVideoUrl(img)
+                    return (
+                      <button 
+                        key={i} 
+                        onClick={() => setSelectedImage(i)}
+                        className={`w-20 h-20 rounded-2xl overflow-hidden border-2 shrink-0 bg-slate-50 transition-all relative flex items-center justify-center ${
+                          i === selectedImage ? 'border-blue-600 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                        title={isVid ? `Video item ${i + 1}` : `Image item ${i + 1}`}
+                      >
+                        {isVid ? (
+                          <div className='w-full h-full flex flex-col items-center justify-center bg-slate-900 text-amber-400 p-2'>
+                            <Video size={22} />
+                            <span className='text-[9px] font-bold mt-1 text-slate-200'>VIDEO</span>
+                          </div>
+                        ) : (
+                          <Image src={img} alt='' width={80} height={80} className='object-contain p-2' />
+                        )}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>

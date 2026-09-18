@@ -2,9 +2,10 @@ import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, Search, Edit2, ExternalLink, Package, ArrowLeft } from 'lucide-react'
+import { Plus, Search, Edit2, ExternalLink, Package, ArrowLeft, Video } from 'lucide-react'
 import { ProductTableActions } from '@/components/admin/ProductTableActions'
 import { FALLBACK_PRODUCTS } from '@/lib/products'
+import { isVideoUrl } from '@/lib/media'
 
 export default async function AdminProductsPage({
   searchParams,
@@ -130,7 +131,14 @@ export default async function AdminProductsPage({
                     <div className='flex items-center gap-3.5'>
                       <div className='w-12 h-12 rounded-xl bg-slate-900 overflow-hidden relative border border-slate-800 shrink-0 p-1 flex items-center justify-center'>
                         {product.images && product.images[0] ? (
-                          <Image src={product.images[0]} alt={product.name} fill className='object-contain p-1' />
+                          isVideoUrl(product.images[0]) ? (
+                            <div className='w-full h-full flex flex-col items-center justify-center text-amber-400'>
+                              <Video size={20} />
+                              <span className='text-[8px] font-bold text-slate-300'>VIDEO</span>
+                            </div>
+                          ) : (
+                            <Image src={product.images[0]} alt={product.name} fill className='object-contain p-1' />
+                          )
                         ) : (
                           <Package size={20} className='text-slate-500' />
                         )}

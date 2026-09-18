@@ -8,6 +8,7 @@ import { useWishlistStore, useCompareStore } from '@/store'
 import { StarRating } from '@/components/ui/StarRating'
 import toast from 'react-hot-toast'
 import type { Product } from '@/types'
+import { isVideoUrl } from '@/lib/media'
 
 const BADGE_STYLES: Record<string, string> = {
   NEW: 'bg-blue-600 text-white',
@@ -52,12 +53,22 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
         {/* Product Image */}
         <Link href={`/product/${product.slug}`}>
           <div className='relative h-52 bg-slate-50 overflow-hidden flex items-center justify-center'>
-            <Image 
-              src={product.images?.[0] || '/uploads/products/Forceps.png'} 
-              alt={product.name} 
-              fill 
-              className='object-contain p-5 group-hover:scale-105 transition-transform duration-300' 
-            />
+            {isVideoUrl(product.images?.[0]) ? (
+              <video 
+                src={product.images[0]} 
+                muted 
+                playsInline 
+                loop 
+                className='w-full h-full object-cover p-2' 
+              />
+            ) : (
+              <Image 
+                src={product.images?.[0] || '/uploads/products/Forceps.png'} 
+                alt={product.name} 
+                fill 
+                className='object-contain p-5 group-hover:scale-105 transition-transform duration-300' 
+              />
+            )}
           </div>
         </Link>
 
