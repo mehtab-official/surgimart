@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   // output: 'standalone' — only needed for self-hosted Docker, not Vercel
   // Turbopack config (Next.js 16 default bundler)
   turbopack: {},
+  // Allow large file uploads (videos up to 100MB) through API routes & Server Actions
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '100mb',
+    },
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'cdn.sanity.io' },

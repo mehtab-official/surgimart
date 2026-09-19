@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/server/middlewares'
-import { v2 as cloudinary } from 'cloudinary'
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary'
 
 import { SUPPORTED_VIDEO_EXTENSIONS, SUPPORTED_VIDEO_MIME_TYPES, getVideoMimeType } from '@/lib/media'
 
@@ -22,19 +22,73 @@ const ALLOWED_VIDEO_EXTENSIONS = SUPPORTED_VIDEO_EXTENSIONS
 const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024 // 20MB
 const MAX_VIDEO_SIZE_BYTES = 100 * 1024 * 1024 // 100MB
 
+function hasCloudinaryConfig(): boolean {
+  return Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME && 
+    process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name' &&
+    process.env.CLOUDINARY_API_KEY && 
+    process.env.CLOUDINARY_API_KEY !== 'your_api_key' &&
+    process.env.CLOUDINARY_API_SECRET &&
+    process.env.CLOUDINARY_API_SECRET !== 'your_api_secret'
+  )
+}
+
+function configureCloudinary(): void {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  })
+}
+
+/**
+ * Upload a buffer to Cloudinary using upload_stream (works for both images and large videos).
+ */
+function uploadToCloudinary(
+  buffer: Buffer,
+  options: { folder: string; resource_type: 'image' | 'video' }
+): Promise<UploadApiResponse> {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: options.folder,
+        resource_type: options.resource_type,
+        // For videos: set a reasonable chunk size to avoid memory issues
+        ...(options.resource_type === 'video' ? { chunk_size: 6_000_000 } : {}),
+      },
+      (error, result) => {
+        if (error) {
+          reject(error)
+        } else if (result) {
+          resolve(result)
+        } else {
+          reject(new Error('Cloudinary returned neither error nor result'))
+        }
+      }
+    )
+    stream.end(buffer)
+  })
+}
+
 export class UploadController {
-  async getStatus() {
+  async getStatus(): Promise<NextResponse> {
     const authCheck = await requireAdmin()
     if ('response' in authCheck) return authCheck.response
 
+    const configured = hasCloudinaryConfig()
+
     return NextResponse.json({
+      cloudinary_configured: configured,
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? '✅ set' : '❌ missing',
       api_key: process.env.CLOUDINARY_API_KEY ? '✅ set' : '❌ missing',
       api_secret: process.env.CLOUDINARY_API_SECRET ? '✅ set' : '❌ missing',
+      local_fallback: !configured ? '✅ active (uploads saved to public/uploads/)' : '⏸️ standby',
+      max_video_size: `${MAX_VIDEO_SIZE_BYTES / 1024 / 1024}MB`,
+      max_image_size: `${MAX_IMAGE_SIZE_BYTES / 1024 / 1024}MB`,
     })
   }
 
-  async uploadImage(req: NextRequest) {
+  async uploadImage(req: NextRequest): Promise<NextResponse> {
     const authCheck = await requireAdmin()
     if ('response' in authCheck) {
       // If running locally in development without session cookies, allow upload
@@ -45,16 +99,6 @@ export class UploadController {
       }
     }
 
-    const hasCloudinary = 
-      Boolean(
-        process.env.CLOUDINARY_CLOUD_NAME && 
-        process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name' &&
-        process.env.CLOUDINARY_API_KEY && 
-        process.env.CLOUDINARY_API_KEY !== 'your_api_key' &&
-        process.env.CLOUDINARY_API_SECRET &&
-        process.env.CLOUDINARY_API_SECRET !== 'your_api_secret'
-      )
-
     try {
       const formData = await req.formData()
       const file = formData.get('file') as File
@@ -63,8 +107,15 @@ export class UploadController {
         return NextResponse.json({ error: 'No file provided in form data' }, { status: 400 })
       }
 
+      // Validate file has content
+      if (file.size === 0) {
+        return NextResponse.json({ error: 'File is empty (0 bytes)' }, { status: 400 })
+      }
+
       const fileType = (file.type || '').toLowerCase()
       const rawExt = (file.name.split('.').pop() || '').toLowerCase()
+
+      console.info(`[Upload API] Received file: name="${file.name}", type="${fileType}", size=${(file.size / 1024 / 1024).toFixed(2)}MB, ext="${rawExt}"`)
 
       const isVideo = 
         ALLOWED_VIDEO_MIME_TYPES.has(fileType) || 
@@ -92,26 +143,24 @@ export class UploadController {
       }
 
       const safeExt = rawExt || (isVideo ? 'mp4' : 'png')
-      const mime = fileType || (isVideo ? getVideoMimeType(safeExt) : 'image/png')
-
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
 
-      if (hasCloudinary) {
+      // Try Cloudinary first
+      if (hasCloudinaryConfig()) {
         try {
-          cloudinary.config({
-            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-            api_key: process.env.CLOUDINARY_API_KEY,
-            api_secret: process.env.CLOUDINARY_API_SECRET,
-          })
-          const base64 = `data:${mime};base64,${buffer.toString('base64')}`
-          const result = await cloudinary.uploader.upload(base64, {
+          configureCloudinary()
+          
+          // Use upload_stream for both images and videos (avoids base64 memory issues for large files)
+          const result = await uploadToCloudinary(buffer, {
             folder: isVideo ? 'surgimart/videos' : 'surgimart/products',
             resource_type: isVideo ? 'video' : 'image',
           })
+
+          console.info(`[Upload API] Cloudinary upload success: ${result.secure_url} (${isVideo ? 'video' : 'image'})`)
           return NextResponse.json({ url: result.secure_url, isVideo })
         } catch (cloudinaryErr) {
-          console.warn('[Upload API] Cloudinary upload failed, falling back to local disk:', cloudinaryErr)
+          console.error('[Upload API] Cloudinary upload failed, falling back to local disk:', cloudinaryErr)
           // Fall through to local disk storage
         }
       }
@@ -127,11 +176,12 @@ export class UploadController {
       const filePath = path.join(uploadDir, fileName)
       await fs.writeFile(filePath, buffer)
 
+      console.info(`[Upload API] Local upload success: /uploads/${subFolder}/${fileName} (${isVideo ? 'video' : 'image'}, ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
       return NextResponse.json({ url: `/uploads/${subFolder}/${fileName}`, isVideo })
     } catch (error) {
       console.error('[Upload API] Error:', error instanceof Error ? error.message : error)
       return NextResponse.json(
-        { error: error instanceof Error ? error.message : 'Upload failed due to an unexpected server error' },
+        { error: 'Upload failed due to an unexpected server error' },
         { status: 500 }
       )
     }
