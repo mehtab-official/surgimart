@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { ShowcaseItem } from '@/types'
-import { VIDEO_FILE_ACCEPT } from '@/lib/media'
+import { VIDEO_FILE_ACCEPT, uploadMediaDirectly } from '@/lib/media'
 
 export default function AdminShowcasePage() {
   const [items, setItems] = useState<ShowcaseItem[]>([])
@@ -52,22 +52,14 @@ export default function AdminShowcasePage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const formData = new FormData()
-    formData.append('file', file)
-
     setUploadingId(`${itemId}-${targetType}`)
     const toastId = toast.loading(`Uploading ${targetType === 'video' ? 'video file' : 'poster image'}...`)
 
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-      const data = await res.json()
+      const result = await uploadMediaDirectly(file, 'surgimart')
 
-      if (!res.ok) {
-        throw new Error(data.error || `Upload failed with status ${res.status}`)
+      if (!result.url) {
+        throw new Error('Upload succeeded but no media URL was returned')
       }
 
       setItems(prev => prev.map(item => {
@@ -75,13 +67,13 @@ export default function AdminShowcasePage() {
         if (targetType === 'video') {
           return {
             ...item,
-            videoUrl: data.url,
+            videoUrl: result.url,
             mediaType: 'video'
           }
         } else {
           return {
             ...item,
-            image: data.url
+            image: result.url
           }
         }
       }))
@@ -97,7 +89,7 @@ export default function AdminShowcasePage() {
   }
 
   // Update item field
-  function updateItem(id: string, field: keyof ShowcaseItem, value: any) {
+  function updateItem<K extends keyof ShowcaseItem>(id: string, field: K, value: ShowcaseItem[K]) {
     setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item))
   }
 

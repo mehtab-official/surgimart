@@ -115,3 +115,89 @@ export function getVideoMimeType(urlOrExt: string): string {
       return 'video/mp4'
   }
 }
+
+export interface DirectUploadResult {
+  url: string
+  isVideo: boolean
+}
+
+/**
+ * Uploads media directly to Cloudinary to bypass Vercel's 4.5MB serverless payload limit.
+ * Falls back to /api/admin/upload if Cloudinary signing fails or in local development.
+ */
+export async function uploadMediaDirectly(
+  file: File,
+  folder = 'surgimart',
+  onProgress?: (percent: number) => void
+): Promise<DirectUploadResult> {
+  const isVideo = isVideoUrl(file.name) || (file.type || '').startsWith('video/')
+  const resourceType = isVideo ? 'video' : 'image'
+  const subFolder = isVideo ? `${folder}/videos` : `${folder}/products`
+
+  try {
+    // 1. Request upload signature from server
+    const signRes = await fetch('/api/admin/cloudinary/sign', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folder: subFolder, resource_type: resourceType }),
+    })
+
+    if (signRes.ok) {
+      const signData = await signRes.json()
+      const { signature, timestamp, apiKey, cloudName } = signData
+
+      if (signature && apiKey && cloudName) {
+        // 2. Direct upload to Cloudinary API (streaming directly from browser)
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', file)
+        uploadFormData.append('api_key', apiKey)
+        uploadFormData.append('timestamp', String(timestamp))
+        uploadFormData.append('signature', signature)
+        uploadFormData.append('folder', subFolder)
+
+        const cloudinaryEndpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`
+
+        const cloudRes = await fetch(cloudinaryEndpoint, {
+          method: 'POST',
+          body: uploadFormData,
+        })
+
+        if (cloudRes.ok) {
+          const cloudData = await cloudRes.json()
+          if (cloudData.secure_url) {
+            return {
+              url: cloudData.secure_url,
+              isVideo,
+            }
+          }
+        } else {
+          const errData = await cloudRes.json().catch(() => ({}))
+          console.warn('[Direct Upload] Cloudinary upload returned error:', errData)
+        }
+      }
+    }
+  } catch (directErr) {
+    console.warn('[Direct Upload] Direct Cloudinary upload failed, falling back to server route:', directErr)
+  }
+
+  // Fallback to /api/admin/upload
+  const fallbackFormData = new FormData()
+  fallbackFormData.append('file', file)
+
+  const serverRes = await fetch('/api/admin/upload', {
+    method: 'POST',
+    credentials: 'include',
+    body: fallbackFormData,
+  })
+
+  const serverData = await serverRes.json()
+  if (!serverRes.ok) {
+    throw new Error(serverData.error || `Upload failed with status ${serverRes.status}`)
+  }
+
+  return {
+    url: serverData.url,
+    isVideo: Boolean(serverData.isVideo ?? isVideo),
+  }
+}

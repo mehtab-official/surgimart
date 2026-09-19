@@ -10,7 +10,7 @@ import Image from 'next/image'
 import { productSchema } from '@/lib/validations'
 
 import { Product } from '@/types'
-import { ALL_MEDIA_FILE_ACCEPT, isVideoUrl } from '@/lib/media'
+import { ALL_MEDIA_FILE_ACCEPT, isVideoUrl, uploadMediaDirectly } from '@/lib/media'
 
 type ProductFormData = z.infer<typeof productSchema>
 
@@ -82,25 +82,15 @@ export function ProductForm({ initialData, productId }: Props) {
     if (!file) return
 
     setIsUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
-
     const toastId = toast.loading('Uploading media (photo or video)...')
 
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-      const data = await res.json()
-      if (res.ok && data.url) {
-        setImages(prev => [...prev, data.url])
-        toast.success(`${data.isVideo ? 'Video' : 'Photo'} uploaded successfully!`, { id: toastId })
+      const result = await uploadMediaDirectly(file, 'surgimart')
+      if (result.url) {
+        setImages(prev => [...prev, result.url])
+        toast.success(`${result.isVideo ? 'Video' : 'Photo'} uploaded successfully!`, { id: toastId })
       } else {
-        const errorMsg = data.error || `Upload failed with HTTP ${res.status}`
-        toast.error(errorMsg, { id: toastId })
-        throw new Error(errorMsg)
+        throw new Error('Upload succeeded but no media URL returned')
       }
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Upload failed'
