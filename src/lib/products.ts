@@ -288,9 +288,7 @@ export async function getAllProducts(options?: {
 
 function mapDbProduct(p: any): Product | null {
   const stock = typeof p.stockCount === 'number' ? p.stockCount : (typeof p.stock === 'number' ? p.stock : 100)
-  const mappedCategory = normalizeCategory(p.category || '')
-  // Skip products that belong to non-essential / excessive categories
-  if (!mappedCategory) return null
+  const mappedCategory = normalizeCategory(p.category || '') || (p.category ? p.category : 'General Surgery')
   return {
     id: p.id,
     name: p.name,
@@ -318,8 +316,7 @@ function mapDbProduct(p: any): Product | null {
 }
 
 // Maps any DB category string to one of the exact 7 public shop categories.
-// Returns null if category doesn't belong to the 7 valid ones (product is hidden from shop).
-function normalizeCategory(cat: string): string | null {
+export function normalizeCategory(cat: string): string | null {
   const c = (cat || '').toLowerCase().replace(/[-_\s]/g, '')
   if (c.includes('general') || c === 'surgical') return 'General Surgery'
   if (c.includes('ortho')) return 'Orthopaedic Instruments & Implants'
@@ -328,17 +325,33 @@ function normalizeCategory(cat: string): string | null {
   if (c.includes('dent')) return 'Dental Surgery Instruments'
   if (c.includes('neuro') || c.includes('spin') || c.includes('spinal')) return 'Neuro & Spinal Surgery'
   if (c.includes('vet') || c.includes('animal')) return 'Veterinary Surgical & Implants'
-  // Everything else (Disposable, Cardiovascular, Sterilization, Obstetric, etc.) is excluded
   return null
 }
 
 function filterFallback(category?: string): { products: Product[]; total: number } {
-  let list = FALLBACK_PRODUCTS
+  // If runtime products exist from admin creations, include them
+  let allList = FALLBACK_PRODUCTS
+  try {
+    const { getRuntimeProducts } = require('@/server/services/product.service')
+    const runtimeList = getRuntimeProducts()
+    if (runtimeList && runtimeList.length > 0) {
+      const mapped = runtimeList.map(mapDbProduct).filter((p: Product | null): p is Product => p !== null)
+      if (mapped.length > 0) {
+        allList = mapped
+      }
+    }
+  } catch {
+    // If running in client or import not available, fallback to static FALLBACK_PRODUCTS
+  }
+
+  let list = allList
   if (category && category.toLowerCase() !== 'all') {
     const target = normalizeCategory(category)
-    list = list.filter(p => normalizeCategory(p.category) === target)
-    // If no exact category match, return full list so empty screen is not shown
-    if (list.length === 0) list = FALLBACK_PRODUCTS
+    if (target) {
+      list = list.filter(p => normalizeCategory(p.category) === target)
+    } else {
+      list = list.filter(p => p.category?.toLowerCase() === category.toLowerCase())
+    }
   }
   return { products: list, total: list.length }
 }

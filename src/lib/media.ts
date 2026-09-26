@@ -67,7 +67,7 @@ export function isVideoUrl(url?: string | null): boolean {
   if (
     cleanUrl.includes('/uploads/videos/') ||
     cleanUrl.includes('/video/upload/') ||
-    cleanUrl.includes('res.cloudinary.com/') && cleanUrl.includes('/video/')
+    cleanUrl.includes('/videos/')
   ) {
     return true
   }
@@ -122,73 +122,31 @@ export interface DirectUploadResult {
 }
 
 /**
- * Uploads media directly to Cloudinary to bypass Vercel's 4.5MB serverless payload limit.
- * Falls back to /api/admin/upload if Cloudinary signing fails or in local development.
+ * Uploads media directly to /api/admin/upload.
+ * Supports compressed videos under 4.5MB suitable for Vercel deployment.
  */
 export async function uploadMediaDirectly(
   file: File,
-  folder = 'surgimart',
-  onProgress?: (percent: number) => void
+  _folder = 'surgimart',
+  _onProgress?: (percent: number) => void
 ): Promise<DirectUploadResult> {
   const isVideo = isVideoUrl(file.name) || (file.type || '').startsWith('video/')
-  const resourceType = isVideo ? 'video' : 'image'
-  const subFolder = isVideo ? `${folder}/videos` : `${folder}/products`
 
-  try {
-    // 1. Request upload signature from server
-    const signRes = await fetch('/api/admin/cloudinary/sign', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ folder: subFolder, resource_type: resourceType }),
-    })
-
-    if (signRes.ok) {
-      const signData = await signRes.json()
-      const { signature, timestamp, apiKey, cloudName } = signData
-
-      if (signature && apiKey && cloudName) {
-        // 2. Direct upload to Cloudinary API (streaming directly from browser)
-        const uploadFormData = new FormData()
-        uploadFormData.append('file', file)
-        uploadFormData.append('api_key', apiKey)
-        uploadFormData.append('timestamp', String(timestamp))
-        uploadFormData.append('signature', signature)
-        uploadFormData.append('folder', subFolder)
-
-        const cloudinaryEndpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`
-
-        const cloudRes = await fetch(cloudinaryEndpoint, {
-          method: 'POST',
-          body: uploadFormData,
-        })
-
-        if (cloudRes.ok) {
-          const cloudData = await cloudRes.json()
-          if (cloudData.secure_url) {
-            return {
-              url: cloudData.secure_url,
-              isVideo,
-            }
-          }
-        } else {
-          const errData = await cloudRes.json().catch(() => ({}))
-          console.warn('[Direct Upload] Cloudinary upload returned error:', errData)
-        }
-      }
-    }
-  } catch (directErr) {
-    console.warn('[Direct Upload] Direct Cloudinary upload failed, falling back to server route:', directErr)
+  // Vercel serverless request body limit is 4.5MB
+  const MAX_VERCEL_BYTES = 4.5 * 1024 * 1024
+  if (file.size > MAX_VERCEL_BYTES) {
+    throw new Error(
+      `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds Vercel's limit of 4.5MB. Please upload a compressed video under 4.5MB.`
+    )
   }
 
-  // Fallback to /api/admin/upload
-  const fallbackFormData = new FormData()
-  fallbackFormData.append('file', file)
+  const formData = new FormData()
+  formData.append('file', file)
 
   const serverRes = await fetch('/api/admin/upload', {
     method: 'POST',
     credentials: 'include',
-    body: fallbackFormData,
+    body: formData,
   })
 
   const serverData = await serverRes.json()

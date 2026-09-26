@@ -173,7 +173,7 @@ export default function AdminShowcasePage() {
             Hero Showcase Videos & Slides
           </h2>
           <p className='text-slate-300 text-sm mt-1 max-w-2xl'>
-            Upload surgical demonstration videos (MP4, WebM up to 100MB) or high-resolution instrument images to be showcased in the landing page interactive hero player.
+            Upload surgical demonstration videos (MP4, WebM up to 4.5MB) or high-resolution instrument images to be showcased in the landing page interactive hero player.
           </p>
         </div>
 
@@ -293,7 +293,7 @@ export default function AdminShowcasePage() {
                     <div>
                       <label className='block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5'>
                         <Video size={13} className='text-amber-400' />
-                        Upload Video (MP4, WebM, MOV, MKV, AVI, etc. up to 100MB):
+                        Upload Video (MP4, WebM, etc. up to 4.5MB):
                       </label>
                       <div className='flex items-center gap-2'>
                         <label className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer border transition-colors ${

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Plus, Search, Edit2, ExternalLink, Package, ArrowLeft, Video } from 'lucide-react'
 import { ProductTableActions } from '@/components/admin/ProductTableActions'
+import { ProductCategoryFilter } from '@/components/admin/ProductCategoryFilter'
 import { FALLBACK_PRODUCTS } from '@/lib/products'
 import { isVideoUrl } from '@/lib/media'
 
@@ -19,47 +20,13 @@ export default async function AdminProductsPage({
   const limit = 10
   const skip = (page - 1) * limit
 
-  let products: any[] = []
-  let total = 0
-
-  try {
-    const where = {
-      AND: [
-        query ? { name: { contains: query, mode: 'insensitive' as const } } : {},
-        category ? { category } : {},
-      ]
-    }
-
-    const [dbProducts, dbTotal] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.product.count({ where }),
-    ])
-
-    if (dbProducts && dbProducts.length > 0) {
-      products = dbProducts
-      total = dbTotal
-    } else {
-      throw new Error('No DB products found, using fallback catalog')
-    }
-  } catch (err) {
-    console.warn('Prisma DB query in AdminProductsPage fell back to FALLBACK_PRODUCTS:', err)
-    let filtered = FALLBACK_PRODUCTS
-    if (query) {
-      filtered = filtered.filter(p => p.name.toLowerCase().includes(query.toLowerCase()) || p.sku?.toLowerCase().includes(query.toLowerCase()))
-    }
-    if (category) {
-      filtered = filtered.filter(p => p.category.toLowerCase() === category.toLowerCase())
-    }
-    total = filtered.length
-    products = filtered.slice(skip, skip + limit)
-  }
-
-  const totalPages = Math.ceil(total / limit)
+  const { productService } = await import('@/server/services/product.service')
+  const { products, total, pages: totalPages } = await productService.listAdminProducts({
+    query,
+    category,
+    page,
+    limit,
+  })
 
   return (
     <div className='space-y-6'>
@@ -92,6 +59,7 @@ export default async function AdminProductsPage({
         <div className='relative flex-1 min-w-[280px]'>
           <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500' size={17} />
           <form method='GET' action='/admin/products'>
+            {category && <input type='hidden' name='category' value={category} />}
             <input 
               name='q'
               type='text' 
@@ -101,6 +69,9 @@ export default async function AdminProductsPage({
             />
           </form>
         </div>
+
+        <ProductCategoryFilter selectedCategory={category} totalCount={total} />
+
         <Link 
           href='/shop' 
           target='_blank'
@@ -208,7 +179,7 @@ export default async function AdminProductsPage({
             </p>
             <div className='flex items-center gap-2'>
               <Link 
-                href={`/admin/products?page=${page - 1}${query ? `&q=${query}` : ''}`}
+                href={`/admin/products?page=${page - 1}${query ? `&q=${encodeURIComponent(query)}` : ''}${category ? `&category=${encodeURIComponent(category)}` : ''}`}
                 className={`px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 transition-colors ${
                   page <= 1 ? 'pointer-events-none opacity-40' : 'hover:bg-slate-800 hover:text-white'
                 }`}
@@ -216,7 +187,7 @@ export default async function AdminProductsPage({
                 Previous
               </Link>
               <Link 
-                href={`/admin/products?page=${page + 1}${query ? `&q=${query}` : ''}`}
+                href={`/admin/products?page=${page + 1}${query ? `&q=${encodeURIComponent(query)}` : ''}${category ? `&category=${encodeURIComponent(category)}` : ''}`}
                 className={`px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 transition-colors ${
                   page >= totalPages ? 'pointer-events-none opacity-40' : 'hover:bg-slate-800 hover:text-white'
                 }`}

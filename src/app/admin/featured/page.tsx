@@ -287,7 +287,7 @@ export default function AdminFeaturedProductsPage() {
                     <div>
                       <label className='block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5'>
                         <Video size={13} className='text-amber-400' />
-                        Product Video (MP4, WebM, MOV, MKV, AVI, etc. up to 100MB):
+                        Product Video (MP4, WebM, etc. up to 4.5MB):
                       </label>
                       <div className='flex items-center gap-2'>
                         <label className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer border transition-colors ${

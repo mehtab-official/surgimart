@@ -10,15 +10,23 @@ export interface ListProductsAdminParams {
 }
 
 // In-memory runtime cache for products added or updated during development
-const runtimeProductStore = new Map<string, any>()
+const globalForProducts = globalThis as unknown as {
+  runtimeProductStore?: Map<string, any>
+}
 
-// Initialize runtime cache with fallback products
-for (const p of FALLBACK_PRODUCTS) {
-  runtimeProductStore.set(p.id, {
-    ...p,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  })
+const runtimeProductStore =
+  globalForProducts.runtimeProductStore ?? new Map<string, any>()
+
+if (!globalForProducts.runtimeProductStore) {
+  // Initialize runtime cache with fallback products once
+  for (const p of FALLBACK_PRODUCTS) {
+    runtimeProductStore.set(p.id, {
+      ...p,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+  }
+  globalForProducts.runtimeProductStore = runtimeProductStore
 }
 
 export class ProductService {
@@ -47,12 +55,10 @@ export class ProductService {
         prisma.product.count({ where }),
       ])
 
-      if (products && products.length > 0) {
-        return {
-          products,
-          total,
-          pages: Math.ceil(total / limit),
-        }
+      return {
+        products,
+        total,
+        pages: Math.max(1, Math.ceil(total / limit)),
       }
     } catch (err) {
       console.warn('Prisma DB error in listAdminProducts, using runtime store:', err)
@@ -71,7 +77,7 @@ export class ProductService {
     return {
       products,
       total,
-      pages: Math.ceil(total / limit),
+      pages: Math.max(1, Math.ceil(total / limit)),
     }
   }
 
@@ -153,6 +159,10 @@ export class ProductService {
     }
     return Array.from(runtimeProductStore.values()).filter(p => ids.includes(p.id))
   }
+}
+
+export function getRuntimeProducts(): any[] {
+  return Array.from(runtimeProductStore.values())
 }
 
 export const productService = new ProductService()

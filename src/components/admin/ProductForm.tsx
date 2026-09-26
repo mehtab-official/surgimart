@@ -298,7 +298,7 @@ export function ProductForm({ initialData, productId }: Props) {
                 <span className='text-xs font-semibold text-slate-300'>
                   {isUploading ? 'Uploading to Server...' : 'Click to upload photograph or video'}
                 </span>
-                <span className='text-[10px] text-slate-500 mt-1'>Images (PNG, JPEG, WebP, SVG) & Videos (MP4, WebM, MOV, MKV, AVI, etc. up to 100MB)</span>
+                <span className='text-[10px] text-slate-500 mt-1'>Images (PNG, JPEG, WebP, SVG) & Videos (MP4, WebM, etc. up to 4.5MB)</span>
               </label>
             </div>
 

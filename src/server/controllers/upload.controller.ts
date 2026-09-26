@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/server/middlewares'
-import { v2 as cloudinary, UploadApiResponse } from 'cloudinary'
-
-import { SUPPORTED_VIDEO_EXTENSIONS, SUPPORTED_VIDEO_MIME_TYPES, getVideoMimeType } from '@/lib/media'
+import { SUPPORTED_VIDEO_EXTENSIONS, SUPPORTED_VIDEO_MIME_TYPES } from '@/lib/media'
 
 const ALLOWED_IMAGE_MIME_TYPES = new Set([
   'image/jpeg',
@@ -19,72 +17,19 @@ const ALLOWED_VIDEO_MIME_TYPES = SUPPORTED_VIDEO_MIME_TYPES
 const ALLOWED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'])
 const ALLOWED_VIDEO_EXTENSIONS = SUPPORTED_VIDEO_EXTENSIONS
 
-const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024 // 20MB
-const MAX_VIDEO_SIZE_BYTES = 100 * 1024 * 1024 // 100MB
-
-function hasCloudinaryConfig(): boolean {
-  return Boolean(
-    process.env.CLOUDINARY_CLOUD_NAME && 
-    process.env.CLOUDINARY_CLOUD_NAME !== 'your_cloud_name' &&
-    process.env.CLOUDINARY_API_KEY && 
-    process.env.CLOUDINARY_API_KEY !== 'your_api_key' &&
-    process.env.CLOUDINARY_API_SECRET &&
-    process.env.CLOUDINARY_API_SECRET !== 'your_api_secret'
-  )
-}
-
-function configureCloudinary(): void {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  })
-}
-
-/**
- * Upload a buffer to Cloudinary using upload_stream (works for both images and large videos).
- */
-function uploadToCloudinary(
-  buffer: Buffer,
-  options: { folder: string; resource_type: 'image' | 'video' }
-): Promise<UploadApiResponse> {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: options.folder,
-        resource_type: options.resource_type,
-        // For videos: set a reasonable chunk size to avoid memory issues
-        ...(options.resource_type === 'video' ? { chunk_size: 6_000_000 } : {}),
-      },
-      (error, result) => {
-        if (error) {
-          reject(error)
-        } else if (result) {
-          resolve(result)
-        } else {
-          reject(new Error('Cloudinary returned neither error nor result'))
-        }
-      }
-    )
-    stream.end(buffer)
-  })
-}
+// Vercel Serverless payload limit is 4.5MB
+const MAX_FILE_SIZE_BYTES = 4.5 * 1024 * 1024 // 4.5MB
 
 export class UploadController {
   async getStatus(): Promise<NextResponse> {
     const authCheck = await requireAdmin()
     if ('response' in authCheck) return authCheck.response
 
-    const configured = hasCloudinaryConfig()
-
     return NextResponse.json({
-      cloudinary_configured: configured,
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? '✅ set' : '❌ missing',
-      api_key: process.env.CLOUDINARY_API_KEY ? '✅ set' : '❌ missing',
-      api_secret: process.env.CLOUDINARY_API_SECRET ? '✅ set' : '❌ missing',
-      local_fallback: !configured ? '✅ active (uploads saved to public/uploads/)' : '⏸️ standby',
-      max_video_size: `${MAX_VIDEO_SIZE_BYTES / 1024 / 1024}MB`,
-      max_image_size: `${MAX_IMAGE_SIZE_BYTES / 1024 / 1024}MB`,
+      status: 'active',
+      storage: 'local/serverless',
+      max_file_size: `${MAX_FILE_SIZE_BYTES / 1024 / 1024}MB`,
+      notice: 'Optimized for Vercel serverless functions (files strictly <= 4.5MB)',
     })
   }
 
@@ -134,10 +79,9 @@ export class UploadController {
         )
       }
 
-      const maxBytes = isVideo ? MAX_VIDEO_SIZE_BYTES : MAX_IMAGE_SIZE_BYTES
-      if (file.size > maxBytes) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
         return NextResponse.json(
-          { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is ${maxBytes / 1024 / 1024}MB.` },
+          { error: `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds Vercel limit of 4.5MB. Please upload a compressed video or image under 4.5MB.` },
           { status: 413 }
         )
       }
@@ -146,26 +90,7 @@ export class UploadController {
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
 
-      // Try Cloudinary first
-      if (hasCloudinaryConfig()) {
-        try {
-          configureCloudinary()
-          
-          // Use upload_stream for both images and videos (avoids base64 memory issues for large files)
-          const result = await uploadToCloudinary(buffer, {
-            folder: isVideo ? 'surgimart/videos' : 'surgimart/products',
-            resource_type: isVideo ? 'video' : 'image',
-          })
-
-          console.info(`[Upload API] Cloudinary upload success: ${result.secure_url} (${isVideo ? 'video' : 'image'})`)
-          return NextResponse.json({ url: result.secure_url, isVideo })
-        } catch (cloudinaryErr) {
-          console.error('[Upload API] Cloudinary upload failed, falling back to local disk:', cloudinaryErr)
-          // Fall through to local disk storage
-        }
-      }
-
-      // Local storage fallback: write directly to public/uploads/
+      // Storage: write to public/uploads/
       const fs = await import('fs/promises')
       const path = await import('path')
       const subFolder = isVideo ? 'videos' : 'products'
@@ -176,7 +101,7 @@ export class UploadController {
       const filePath = path.join(uploadDir, fileName)
       await fs.writeFile(filePath, buffer)
 
-      console.info(`[Upload API] Local upload success: /uploads/${subFolder}/${fileName} (${isVideo ? 'video' : 'image'}, ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+      console.info(`[Upload API] Upload success: /uploads/${subFolder}/${fileName} (${isVideo ? 'video' : 'image'}, ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
       return NextResponse.json({ url: `/uploads/${subFolder}/${fileName}`, isVideo })
     } catch (error) {
       console.error('[Upload API] Error:', error instanceof Error ? error.message : error)

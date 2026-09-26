@@ -60,29 +60,28 @@ export function ShopClient({ initialProducts, initialCategory = 'All', initialQu
     
     if (category !== 'All') {
       const target = normalize(category)
-      const matched = pList.filter(p => normalize(p.category) === target)
-      // If category has products, filter by it; otherwise show all rather than empty screen
-      if (matched.length > 0) {
-        pList = matched
-      }
+      pList = pList.filter(p => normalize(p.category) === target)
     }
     
     if (search.trim()) {
       const q = search.toLowerCase()
-      const searchMatched = pList.filter(p => 
+      pList = pList.filter(p => 
         p.name?.toLowerCase().includes(q) || 
         p.description?.toLowerCase().includes(q) ||
-        p.category?.toLowerCase().includes(q)
+        p.category?.toLowerCase().includes(q) ||
+        p.sku?.toLowerCase().includes(q)
       )
-      if (searchMatched.length > 0) {
-        pList = searchMatched
-      }
     }
     
     switch (sort) {
       case 'price-asc': pList.sort((a, b) => (a.price || 0) - (b.price || 0)); break
       case 'price-desc': pList.sort((a, b) => (b.price || 0) - (a.price || 0)); break
       case 'popular': pList.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break
+      case 'newest': pList.sort((a, b) => {
+        const dateA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : 0
+        const dateB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : 0
+        return dateB - dateA
+      }); break
     }
     return pList
   }, [category, sort, search, initialProducts])
@@ -224,7 +223,25 @@ export function ShopClient({ initialProducts, initialCategory = 'All', initialQu
       </div>
 
       {/* Product Grid */}
-      <ProductGrid products={filtered} columns={4} />
+      {filtered.length > 0 ? (
+        <ProductGrid products={filtered} columns={4} />
+      ) : (
+        <div className='py-20 text-center bg-slate-900/40 rounded-3xl border border-dashed border-slate-800 p-8'>
+          <p className='text-base font-bold text-white mb-2'>No instruments found in this category</p>
+          <p className='text-xs text-slate-400 max-w-md mx-auto mb-6'>
+            There are currently no instruments matching the selected filter or search keyword.
+          </p>
+          <button
+            onClick={() => {
+              setCategory('All')
+              setSearch('')
+            }}
+            className='px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-blue-600/20'
+          >
+            Reset Filters
+          </button>
+        </div>
+      )}
 
     </div>
   )
