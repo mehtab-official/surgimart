@@ -189,12 +189,37 @@ export function Footer() {
         </div>
       </div>
 
-      {/* ── COPYRIGHT BAR ── */}
+      {/* ── COPYRIGHT & CREATOR BAR ── */}
       <div className='border-t border-slate-900 bg-slate-950/90 py-6 text-slate-500 text-[11px]'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4'>
           <div>
             © {new Date().getFullYear()} SubMedOrtho (www.submedortho.com). All rights reserved. Sialkot, Pakistan.
           </div>
+
+          {/* Aesthetic Creator Trademark */}
+          <div className='flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-800/80 shadow-inner backdrop-blur-sm group hover:border-blue-500/40 transition-all duration-300'>
+            <span className='inline-block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse' />
+            <span className='text-slate-400 font-medium tracking-wide'>
+              Crafted with precision by{' '}
+              <span className='font-semibold text-slate-200 group-hover:text-blue-400 transition-colors'>
+                Ali Hassan
+              </span>
+            </span>
+            <span className='text-slate-600'>•</span>
+            <a
+              href='https://www.linkedin.com/in/ali-hassan-206392317'
+              target='_blank'
+              rel='noopener noreferrer'
+              aria-label='Ali Hassan LinkedIn Profile'
+              className='inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 font-semibold transition-colors'
+            >
+              <svg className='w-3 h-3 fill-current' viewBox='0 0 24 24'>
+                <path d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.63 1.63 0 1 0 0 3.26 1.63 1.63 0 0 0 0-3.26z' />
+              </svg>
+              <span>Connect</span>
+            </a>
+          </div>
+
           <div className='flex items-center gap-4 text-slate-400'>
             <span>ISO 9001:2015</span>
             <span>•</span>
