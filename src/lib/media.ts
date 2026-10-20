@@ -134,8 +134,10 @@ export async function uploadMediaDirectly(
   const resourceType = isVideo ? 'video' : 'image'
   const subFolder = isVideo ? `${folder}/videos` : `${folder}/products`
 
+  let directErrorMsg = ''
+
+  // 1. Attempt client-side direct upload to Cloudinary (bypasses serverless file size limits)
   try {
-    // 1. Request upload signature from server
     const signRes = await fetch('/api/admin/cloudinary/sign', {
       method: 'POST',
       credentials: 'include',
@@ -148,7 +150,6 @@ export async function uploadMediaDirectly(
       const { signature, timestamp, apiKey, cloudName } = signData
 
       if (signature && apiKey && cloudName) {
-        // 2. Direct upload to Cloudinary API (streaming directly from client browser)
         const uploadFormData = new FormData()
         uploadFormData.append('file', file)
         uploadFormData.append('api_key', apiKey)
@@ -173,19 +174,26 @@ export async function uploadMediaDirectly(
           }
         } else {
           const errData = await cloudRes.json().catch(() => ({}))
-          console.warn('[Direct Upload] Cloudinary direct upload failed, attempting fallback:', errData)
+          directErrorMsg = errData?.error?.message || `Cloudinary rejected (${cloudRes.status})`
+          console.warn('[Direct Upload] Cloudinary direct upload failed:', directErrorMsg)
         }
       }
+    } else {
+      const signErr = await signRes.json().catch(() => ({}))
+      directErrorMsg = signErr?.error || `Signature request failed (${signRes.status})`
+      console.warn('[Direct Upload] Sign request rejected:', directErrorMsg)
     }
   } catch (directErr) {
-    console.warn('[Direct Upload] Direct Cloudinary attempt threw error, attempting fallback:', directErr)
+    directErrorMsg = directErr instanceof Error ? directErr.message : String(directErr)
+    console.warn('[Direct Upload] Direct Cloudinary attempt threw error:', directErrorMsg)
   }
 
-  // Fallback to /api/admin/upload (subject to serverless payload limits)
-  const MAX_FALLBACK_BYTES = 4.5 * 1024 * 1024
-  if (file.size > MAX_FALLBACK_BYTES) {
+  // 2. Server-side upload via /api/admin/upload
+  const MAX_SERVERLESS_BYTES = 4.5 * 1024 * 1024
+  if (file.size > MAX_SERVERLESS_BYTES) {
+    const sizeMb = (file.size / 1024 / 1024).toFixed(1)
     throw new Error(
-      `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds limit. Please configure Cloudinary or upload a file under 4.5MB.`
+      `File is ${sizeMb}MB (exceeds direct upload limit). Direct upload error: ${directErrorMsg || 'Cloudinary signature unavailable'}. Please check your connection or choose a smaller file.`
     )
   }
 
@@ -198,7 +206,7 @@ export async function uploadMediaDirectly(
     body: formData,
   })
 
-  const serverData = await serverRes.json()
+  const serverData = await serverRes.json().catch(() => ({}))
   if (!serverRes.ok) {
     throw new Error(serverData.error || `Upload failed with status ${serverRes.status}`)
   }

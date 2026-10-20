@@ -87,7 +87,11 @@ export function ProductForm({ initialData, productId }: Props) {
     try {
       const result = await uploadMediaDirectly(file, 'surgimart')
       if (result.url) {
-        setImages(prev => [...prev, result.url])
+        setImages(prev => {
+          const next = [...prev, result.url]
+          setValue('images', next, { shouldValidate: true })
+          return next
+        })
         toast.success(`${result.isVideo ? 'Video' : 'Photo'} uploaded successfully!`, { id: toastId })
       } else {
         throw new Error('Upload succeeded but no media URL returned')
@@ -103,17 +107,41 @@ export function ProductForm({ initialData, productId }: Props) {
   }
 
   const addImageUrl = () => {
-    if (!imageUrlInput) return
-    setImages(prev => [...prev, imageUrlInput])
+    if (!imageUrlInput.trim()) return
+    const url = imageUrlInput.trim()
+    setImages(prev => {
+      const next = [...prev, url]
+      setValue('images', next, { shouldValidate: true })
+      return next
+    })
     setImageUrlInput('')
     toast.success('Image added via URL')
   }
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index))
+    setImages(prev => {
+      const next = prev.filter((_, i) => i !== index)
+      setValue('images', next, { shouldValidate: true })
+      return next
+    })
+  }
+
+  const onInvalid = (formErrors: typeof errors) => {
+    const errorFields = Object.keys(formErrors)
+    if (errorFields.length > 0) {
+      const firstField = errorFields[0]
+      const msg = formErrors[firstField as keyof typeof formErrors]?.message || 'Please fill in all required fields'
+      toast.error(`Validation Error: ${firstField} — ${msg}`)
+      console.warn('[ProductForm] Validation failed:', formErrors)
+    }
   }
 
   async function onSubmit(data: ProductFormData) {
+    if (images.length === 0) {
+      toast.error('Please upload at least one photograph or enter an image URL')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const url = productId ? `/api/admin/products/${productId}` : '/api/admin/products'
@@ -123,7 +151,7 @@ export function ProductForm({ initialData, productId }: Props) {
         method,
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, images }),
       })
 
       if (!res.ok) {
@@ -135,7 +163,7 @@ export function ProductForm({ initialData, productId }: Props) {
         throw new Error(details ? `${message} — ${details}` : message)
       }
 
-      toast.success(productId ? 'Product updated' : 'Product created')
+      toast.success(productId ? 'Product updated successfully' : 'Product created successfully')
       router.push('/admin/products')
       router.refresh()
     } catch (error: unknown) {
@@ -148,7 +176,7 @@ export function ProductForm({ initialData, productId }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-8 max-w-4xl text-slate-200'>
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className='space-y-8 max-w-4xl text-slate-200'>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
         {/* Left Column: Basic Info */}
         <div className='space-y-6'>

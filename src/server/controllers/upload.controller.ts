@@ -90,7 +90,43 @@ export class UploadController {
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
 
-      // Storage: write to public/uploads/
+      // 1. If Cloudinary credentials exist, upload directly to Cloudinary (permanent CDN)
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME
+      const apiKey = process.env.CLOUDINARY_API_KEY
+      const apiSecret = process.env.CLOUDINARY_API_SECRET
+
+      if (cloudName && apiKey && apiSecret) {
+        try {
+          const { v2: cloudinary } = await import('cloudinary')
+          cloudinary.config({
+            cloud_name: cloudName,
+            api_key: apiKey,
+            api_secret: apiSecret,
+          })
+
+          const subFolder = isVideo ? 'surgimart/videos' : 'surgimart/products'
+          const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: subFolder,
+                resource_type: isVideo ? 'video' : 'image',
+              },
+              (err, res) => {
+                if (err || !res) reject(err || new Error('Upload stream returned empty result'))
+                else resolve(res)
+              }
+            )
+            uploadStream.end(buffer)
+          })
+
+          console.info(`[Upload API] Cloudinary upload success: ${result.secure_url} (${isVideo ? 'video' : 'image'})`)
+          return NextResponse.json({ url: result.secure_url, isVideo })
+        } catch (cloudErr) {
+          console.warn('[Upload API] Cloudinary upload failed, attempting local fallback:', cloudErr)
+        }
+      }
+
+      // 2. Storage fallback: write to public/uploads/
       const fs = await import('fs/promises')
       const path = await import('path')
       const subFolder = isVideo ? 'videos' : 'products'
@@ -101,12 +137,12 @@ export class UploadController {
       const filePath = path.join(uploadDir, fileName)
       await fs.writeFile(filePath, buffer)
 
-      console.info(`[Upload API] Upload success: /uploads/${subFolder}/${fileName} (${isVideo ? 'video' : 'image'}, ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+      console.info(`[Upload API] Local upload success: /uploads/${subFolder}/${fileName} (${isVideo ? 'video' : 'image'}, ${(file.size / 1024 / 1024).toFixed(2)}MB)`)
       return NextResponse.json({ url: `/uploads/${subFolder}/${fileName}`, isVideo })
     } catch (error) {
       console.error('[Upload API] Error:', error instanceof Error ? error.message : error)
       return NextResponse.json(
-        { error: 'Upload failed due to an unexpected server error' },
+        { error: 'Upload failed due to an unexpected server error: ' + (error instanceof Error ? error.message : String(error)) },
         { status: 500 }
       )
     }

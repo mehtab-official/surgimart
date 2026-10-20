@@ -7,11 +7,20 @@ import path from 'path'
 const DATA_DIR = path.join(process.cwd(), 'data')
 const SHOWCASE_FILE = path.join(DATA_DIR, 'showcase.json')
 
+const globalForShowcase = globalThis as unknown as {
+  runtimeShowcaseStore?: ShowcaseItem[]
+}
+
 async function getShowcaseItems(): Promise<ShowcaseItem[]> {
+  if (globalForShowcase.runtimeShowcaseStore && globalForShowcase.runtimeShowcaseStore.length > 0) {
+    return globalForShowcase.runtimeShowcaseStore
+  }
+
   try {
     const raw = await fs.readFile(SHOWCASE_FILE, 'utf-8')
     const parsed = JSON.parse(raw)
     if (Array.isArray(parsed) && parsed.length > 0) {
+      globalForShowcase.runtimeShowcaseStore = parsed
       return parsed
     }
   } catch {
@@ -21,8 +30,13 @@ async function getShowcaseItems(): Promise<ShowcaseItem[]> {
 }
 
 async function saveShowcaseItems(items: ShowcaseItem[]): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(SHOWCASE_FILE, JSON.stringify(items, null, 2), 'utf-8')
+  globalForShowcase.runtimeShowcaseStore = items
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true })
+    await fs.writeFile(SHOWCASE_FILE, JSON.stringify(items, null, 2), 'utf-8')
+  } catch (fsErr) {
+    console.warn('[Showcase] Filesystem write bypassed or failed (read-only environment):', fsErr)
+  }
 }
 
 export async function GET() {

@@ -7,11 +7,20 @@ import path from 'path'
 const DATA_DIR = path.join(process.cwd(), 'data')
 const FEATURED_PRODUCTS_FILE = path.join(DATA_DIR, 'featured-products.json')
 
+const globalForFeatured = globalThis as unknown as {
+  runtimeFeaturedStore?: FeaturedProductItem[]
+}
+
 async function getFeaturedProducts(): Promise<FeaturedProductItem[]> {
+  if (globalForFeatured.runtimeFeaturedStore && globalForFeatured.runtimeFeaturedStore.length > 0) {
+    return globalForFeatured.runtimeFeaturedStore
+  }
+
   try {
     const raw = await fs.readFile(FEATURED_PRODUCTS_FILE, 'utf-8')
     const parsed = JSON.parse(raw)
     if (Array.isArray(parsed) && parsed.length > 0) {
+      globalForFeatured.runtimeFeaturedStore = parsed
       return parsed
     }
   } catch {
@@ -21,8 +30,13 @@ async function getFeaturedProducts(): Promise<FeaturedProductItem[]> {
 }
 
 async function saveFeaturedProducts(items: FeaturedProductItem[]): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(FEATURED_PRODUCTS_FILE, JSON.stringify(items, null, 2), 'utf-8')
+  globalForFeatured.runtimeFeaturedStore = items
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true })
+    await fs.writeFile(FEATURED_PRODUCTS_FILE, JSON.stringify(items, null, 2), 'utf-8')
+  } catch (fsErr) {
+    console.warn('[Featured Products] Filesystem write bypassed or failed (read-only environment):', fsErr)
+  }
 }
 
 export async function GET() {
