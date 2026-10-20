@@ -4,13 +4,18 @@ import { quoteService } from '@/server/services/quote.service'
 import { requireAdmin, requireCsrf, checkRateLimit } from '@/server/middlewares'
 
 const QuoteSchema = z.object({
-  productId: z.string(),
-  productName: z.string(),
-  qty: z.number().int().min(1),
-  name: z.string().min(1),
-  email: z.string().email(),
+  // Accept productId/productName OR fallback from items/subject
+  productId: z.string().optional(),
+  productName: z.string().optional(),
+  items: z.string().optional(),
+  qty: z.union([z.number(), z.string()]).optional(),
+  quantity: z.union([z.number(), z.string()]).optional(),
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Valid email is required'),
   organization: z.string().optional(),
-  country: z.string().min(2),
+  company: z.string().optional(),
+  country: z.string().optional(),
+  phone: z.string().optional(),
   message: z.string().optional(),
 })
 
@@ -19,23 +24,58 @@ export class QuoteController {
     try {
       const body = await req.json()
       const parsed = QuoteSchema.safeParse(body)
-      if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+      if (!parsed.success) {
+        return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
+      }
 
+      const raw = parsed.data
       const rl = await checkRateLimit(
-        `quote_rate:${parsed.data.email}`,
-        3,
+        `quote_rate:${raw.email}`,
+        10,
         3600,
-        'Too many quote requests. Please wait an hour.'
+        'Too many inquiries submitted. Please wait a short while.'
       )
       if ('response' in rl) return rl.response
 
-      await quoteService.createQuote(parsed.data)
-      return NextResponse.json({ message: 'Quote request submitted successfully' }, { status: 201 })
+      // Normalize fields across Contact Us, RFQ Page, and Product Quote Modal
+      const productName = raw.productName || raw.items || 'General Surgical Instrument Inquiry'
+      const productId = raw.productId || (raw.items ? `RFQ-${Date.now().toString(36).toUpperCase()}` : 'CONTACT-INQUIRY')
+      
+      let numericQty = 1
+      const rawQty = raw.qty ?? raw.quantity
+      if (typeof rawQty === 'number') {
+        numericQty = rawQty
+      } else if (typeof rawQty === 'string') {
+        const parsedNum = parseInt(rawQty, 10)
+        numericQty = isNaN(parsedNum) || parsedNum < 1 ? 1 : parsedNum
+      }
+
+      const organization = raw.organization || raw.company || (raw.phone ? `Phone: ${raw.phone}` : undefined)
+      const country = raw.country || 'Global'
+      const combinedMessage = [
+        raw.phone && raw.phone !== 'N/A' ? `Contact Phone: ${raw.phone}` : null,
+        typeof rawQty === 'string' && isNaN(Number(rawQty)) ? `Volume Requested: ${rawQty}` : null,
+        raw.message
+      ].filter(Boolean).join('\n\n')
+
+      const quote = await quoteService.createQuote({
+        productId,
+        productName,
+        qty: numericQty,
+        name: raw.name,
+        email: raw.email,
+        organization,
+        country,
+        message: combinedMessage,
+      })
+
+      return NextResponse.json({ message: 'Inquiry submitted successfully', quote }, { status: 201 })
     } catch (error) {
       console.error('Quote request error:', error)
-      return NextResponse.json({ error: 'Failed to submit quote request' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to submit inquiry' }, { status: 500 })
     }
   }
+
 
   async updateAdminQuoteStatus(
     req: NextRequest,

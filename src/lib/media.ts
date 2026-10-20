@@ -122,21 +122,70 @@ export interface DirectUploadResult {
 }
 
 /**
- * Uploads media directly to /api/admin/upload.
- * Supports compressed videos under 4.5MB suitable for Vercel deployment.
+ * Uploads media directly to Cloudinary bypassing Vercel's 4.5MB serverless payload limit.
+ * Falls back to /api/admin/upload if Cloudinary signing is unavailable or fails.
  */
 export async function uploadMediaDirectly(
   file: File,
-  _folder = 'surgimart',
+  folder = 'surgimart',
   _onProgress?: (percent: number) => void
 ): Promise<DirectUploadResult> {
   const isVideo = isVideoUrl(file.name) || (file.type || '').startsWith('video/')
+  const resourceType = isVideo ? 'video' : 'image'
+  const subFolder = isVideo ? `${folder}/videos` : `${folder}/products`
 
-  // Vercel serverless request body limit is 4.5MB
-  const MAX_VERCEL_BYTES = 4.5 * 1024 * 1024
-  if (file.size > MAX_VERCEL_BYTES) {
+  try {
+    // 1. Request upload signature from server
+    const signRes = await fetch('/api/admin/cloudinary/sign', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folder: subFolder, resource_type: resourceType }),
+    })
+
+    if (signRes.ok) {
+      const signData = await signRes.json()
+      const { signature, timestamp, apiKey, cloudName } = signData
+
+      if (signature && apiKey && cloudName) {
+        // 2. Direct upload to Cloudinary API (streaming directly from client browser)
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', file)
+        uploadFormData.append('api_key', apiKey)
+        uploadFormData.append('timestamp', String(timestamp))
+        uploadFormData.append('signature', signature)
+        uploadFormData.append('folder', subFolder)
+
+        const cloudinaryEndpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`
+
+        const cloudRes = await fetch(cloudinaryEndpoint, {
+          method: 'POST',
+          body: uploadFormData,
+        })
+
+        if (cloudRes.ok) {
+          const cloudData = await cloudRes.json()
+          if (cloudData.secure_url) {
+            return {
+              url: cloudData.secure_url,
+              isVideo,
+            }
+          }
+        } else {
+          const errData = await cloudRes.json().catch(() => ({}))
+          console.warn('[Direct Upload] Cloudinary direct upload failed, attempting fallback:', errData)
+        }
+      }
+    }
+  } catch (directErr) {
+    console.warn('[Direct Upload] Direct Cloudinary attempt threw error, attempting fallback:', directErr)
+  }
+
+  // Fallback to /api/admin/upload (subject to serverless payload limits)
+  const MAX_FALLBACK_BYTES = 4.5 * 1024 * 1024
+  if (file.size > MAX_FALLBACK_BYTES) {
     throw new Error(
-      `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds Vercel's limit of 4.5MB. Please upload a compressed video under 4.5MB.`
+      `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds limit. Please configure Cloudinary or upload a file under 4.5MB.`
     )
   }
 
@@ -159,3 +208,4 @@ export async function uploadMediaDirectly(
     isVideo: Boolean(serverData.isVideo ?? isVideo),
   }
 }
+

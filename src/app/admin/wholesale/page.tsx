@@ -14,26 +14,10 @@ export default async function AdminWholesalePage({
   const limit = 10
   const skip = (page - 1) * limit
 
-  const where = query ? {
-    OR: [
-      { firstName: { contains: query, mode: 'insensitive' as const } },
-      { lastName: { contains: query, mode: 'insensitive' as const } },
-      { organization: { contains: query, mode: 'insensitive' as const } },
-      { email: { contains: query, mode: 'insensitive' as const } },
-    ]
-  } : {}
+  const { wholesaleService } = await import('@/server/services/wholesale.service')
+  const { apps } = await wholesaleService.listApplications(query, page, limit)
 
-  const [apps] = await Promise.all([
-    prisma.wholesaleApplication.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.wholesaleApplication.count({ where }),
-  ])
 
-  // const totalPages = Math.ceil(total / limit)
 
   return (
     <div className='space-y-6'>

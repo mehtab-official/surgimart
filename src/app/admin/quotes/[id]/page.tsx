@@ -7,14 +7,9 @@ import { QuoteStatusButton } from '@/components/admin/QuoteStatusButton'
 
 export default async function QuoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  let quote: any = null
-  try {
-    quote = await prisma.quoteRequest.findUnique({
-      where: { id }
-    })
-  } catch (err) {
-    console.warn('DB error fetching quote detail:', err)
-  }
+  const { quoteService } = await import('@/server/services/quote.service')
+  const quote = await quoteService.getQuoteById(id)
+
 
   if (!quote) {
     return (

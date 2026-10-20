@@ -14,33 +14,9 @@ export default async function AdminQuotesPage({
   const limit = 10
   const skip = (page - 1) * limit
 
-  let quotes: any[] = []
-  let total = 0
+  const { quoteService } = await import('@/server/services/quote.service')
+  const { quotes, total } = await quoteService.listQuotes(query, page, limit)
 
-  try {
-    const where = query ? {
-      OR: [
-        { productName: { contains: query, mode: 'insensitive' as const } },
-        { email: { contains: query, mode: 'insensitive' as const } },
-        { name: { contains: query, mode: 'insensitive' as const } },
-      ]
-    } : {}
-
-    const [dbQuotes, dbTotal] = await Promise.all([
-      prisma.quoteRequest.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.quoteRequest.count({ where }),
-    ])
-
-    quotes = dbQuotes
-    total = dbTotal
-  } catch (err) {
-    console.warn('Prisma DB query in AdminQuotesPage fell back to empty list:', err)
-  }
 
   return (
     <div className='space-y-6'>

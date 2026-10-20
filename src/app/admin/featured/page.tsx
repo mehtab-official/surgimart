@@ -20,9 +20,10 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { FeaturedProductItem } from '@/types'
-import { VIDEO_FILE_ACCEPT } from '@/lib/media'
+import { VIDEO_FILE_ACCEPT, uploadMediaDirectly } from '@/lib/media'
 
 export default function AdminFeaturedProductsPage() {
+
   const [items, setItems] = useState<FeaturedProductItem[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -52,22 +53,14 @@ export default function AdminFeaturedProductsPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const formData = new FormData()
-    formData.append('file', file)
-
     setUploadingId(`${itemId}-${targetType}`)
     const toastId = toast.loading(`Uploading ${targetType === 'video' ? 'video file' : 'product image'}...`)
 
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-      const data = await res.json()
+      const result = await uploadMediaDirectly(file, 'surgimart')
 
-      if (!res.ok) {
-        throw new Error(data.error || `Upload failed with status ${res.status}`)
+      if (!result.url) {
+        throw new Error('Upload succeeded but no media URL was returned')
       }
 
       setItems(prev => prev.map(item => {
@@ -75,12 +68,12 @@ export default function AdminFeaturedProductsPage() {
         if (targetType === 'video') {
           return {
             ...item,
-            videoUrl: data.url,
+            videoUrl: result.url,
           }
         } else {
           return {
             ...item,
-            image: data.url
+            image: result.url
           }
         }
       }))
@@ -88,6 +81,7 @@ export default function AdminFeaturedProductsPage() {
       toast.success(`${targetType === 'video' ? 'Video' : 'Image'} uploaded successfully! Click "Save & Publish" to apply.`, { id: toastId })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Upload failed'
+
       toast.error(msg, { id: toastId })
     } finally {
       setUploadingId(null)

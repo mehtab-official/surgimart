@@ -6,11 +6,12 @@ import { WholesaleStatusActions } from '@/components/admin/WholesaleStatusAction
 
 export default async function WholesaleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const app = await prisma.wholesaleApplication.findUnique({
-    where: { id }
-  })
+  const { wholesaleService } = await import('@/server/services/wholesale.service')
+  const app = await wholesaleService.getApplicationById(id)
 
   if (!app) notFound()
+
+
 
   const categories = app.categories as string[]
 
